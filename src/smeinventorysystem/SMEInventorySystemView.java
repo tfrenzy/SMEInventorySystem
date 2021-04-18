@@ -1,0 +1,3602 @@
+/*
+ * SMEInventorySystemView.java
+ */
+
+package smeinventorysystem;
+
+import org.jdesktop.application.Action;
+import org.jdesktop.application.ResourceMap;
+import org.jdesktop.application.SingleFrameApplication;
+import org.jdesktop.application.FrameView;
+import org.jdesktop.application.TaskMonitor;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.Timer;
+import javax.swing.Icon;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import java.sql.*;
+import java.util.Calendar;
+import java.text.*;
+import java.io.*;
+
+/**
+ * The application's main frame.
+ */
+public class SMEInventorySystemView extends FrameView {
+  public static String OfficerLoggedIn = null;
+    public static String OfficerCategory = null;
+    public String customer = null;
+    public double price = 0;
+    public double alertAmount = 15;
+    public int session = -3;
+    public boolean opportune = true;
+    int reg = 1;
+    public boolean gru = true;
+    String connectionUrl = "jdbc:mysql://localhost:3306/inventory_db?" +
+            "user=root&password=red";
+DecimalFormat decimal;
+    public SMEInventorySystemView(SingleFrameApplication app) {
+        super(app);
+        this.getFrame().setTitle("TT and T Business Services");
+        //initialiseComponents();
+        initComponents();
+        jMenuItem1.setText("Sell good(s)/service to Customer");
+        jMenuItem3.setText("Goods/Services available");
+        jMenuItem5.setText("Fill in Goods/Services");
+        jMenuItem7.setText("Goods/Services Left");
+        jButton15.setText("Fill in Goods/Services");
+        jButton12.setText("Sell good/service to Customer");
+decimal = new DecimalFormat("#");
+
+        // status bar initialization - message timeout, idle icon and busy animation, etc
+        ResourceMap resourceMap = getResourceMap();
+        int messageTimeout = resourceMap.getInteger("StatusBar.messageTimeout");
+        messageTimer = new Timer(messageTimeout, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                statusMessageLabel.setText("");
+            }
+        });
+        messageTimer.setRepeats(false);
+        int busyAnimationRate = resourceMap.getInteger("StatusBar.busyAnimationRate");
+        for (int i = 0; i < busyIcons.length; i++) {
+            busyIcons[i] = resourceMap.getIcon("StatusBar.busyIcons[" + i + "]");
+        }
+        busyIconTimer = new Timer(busyAnimationRate, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                busyIconIndex = (busyIconIndex + 1) % busyIcons.length;
+                statusAnimationLabel.setIcon(busyIcons[busyIconIndex]);
+            }
+        });
+        idleIcon = resourceMap.getIcon("StatusBar.idleIcon");
+        statusAnimationLabel.setIcon(idleIcon);
+        progressBar.setVisible(false);
+
+        // connecting action tasks to status bar via TaskMonitor
+        TaskMonitor taskMonitor = new TaskMonitor(getApplication().getContext());
+        taskMonitor.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                String propertyName = evt.getPropertyName();
+                if ("started".equals(propertyName)) {
+                    if (!busyIconTimer.isRunning()) {
+                        statusAnimationLabel.setIcon(busyIcons[0]);
+                        busyIconIndex = 0;
+                        busyIconTimer.start();
+                    }
+                    progressBar.setVisible(true);
+                    progressBar.setIndeterminate(true);
+
+                } else if ("done".equals(propertyName)) {
+                    busyIconTimer.stop();
+                    statusAnimationLabel.setIcon(idleIcon);
+                    progressBar.setVisible(false);
+                    progressBar.setValue(0);
+                } else if ("message".equals(propertyName)) {
+                    String text = (String)(evt.getNewValue());
+                    statusMessageLabel.setText((text == null) ? "" : text);
+                    messageTimer.restart();
+                } else if ("progress".equals(propertyName)) {
+                    int value = (Integer)(evt.getNewValue());
+                    progressBar.setVisible(true);
+                    progressBar.setIndeterminate(false);
+                    progressBar.setValue(value);
+                }
+            }
+
+        });
+
+    }
+
+    @Action
+    public void showAboutBox() {
+        if (aboutBox == null) {
+            JFrame mainFrame = SMEInventorySystemApp.getApplication().getMainFrame();
+            aboutBox = new SMEInventorySystemAboutBox(mainFrame);
+            aboutBox.setLocationRelativeTo(mainFrame);
+        }
+        SMEInventorySystemApp.getApplication().show(aboutBox);
+    }
+
+    /** This method is called from within the constructor to
+     * initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is
+     * always regenerated by the Form Editor.
+     */
+    //@SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        mainPanel = new javax.swing.JPanel();
+        jDesktopPane1 = new javax.swing.JDesktopPane();
+        jInternalFrame1 = new javax.swing.JInternalFrame();
+        jComboBox1 = new javax.swing.JComboBox();
+        label1 = new java.awt.Label();
+        label2 = new java.awt.Label();
+        label3 = new java.awt.Label();
+        jTextField2 = new javax.swing.JTextField();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
+        jLabel22 = new javax.swing.JLabel();
+        jComboBox6 = new javax.swing.JComboBox();
+        jLabel32 = new javax.swing.JLabel();
+        jComboBox7 = new javax.swing.JComboBox();
+        jScrollPane7 = new javax.swing.JScrollPane();
+        jTable5 = new javax.swing.JTable();
+        jInternalFrame3 = new javax.swing.JInternalFrame();
+        jLabel9 = new javax.swing.JLabel();
+        jTextField3 = new javax.swing.JTextField();
+        jLabel10 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
+        jLabel11 = new javax.swing.JLabel();
+        jComboBox2 = new javax.swing.JComboBox();
+        jLabel12 = new javax.swing.JLabel();
+        jTextField4 = new javax.swing.JTextField();
+        jButton4 = new javax.swing.JButton();
+        jInternalFrame4 = new javax.swing.JInternalFrame();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
+        jButton5 = new javax.swing.JButton();
+        jInternalFrame5 = new javax.swing.JInternalFrame();
+        jLabel13 = new javax.swing.JLabel();
+        jTextField13 = new javax.swing.JTextField();
+        jLabel14 = new javax.swing.JLabel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jTextArea2 = new javax.swing.JTextArea();
+        jLabel15 = new javax.swing.JLabel();
+        jTextField14 = new javax.swing.JTextField();
+        jLabel16 = new javax.swing.JLabel();
+        jTextField15 = new javax.swing.JTextField();
+        jLabel17 = new javax.swing.JLabel();
+        jTextField16 = new javax.swing.JTextField();
+        jTextField17 = new javax.swing.JTextField();
+        jLabel18 = new javax.swing.JLabel();
+        jButton6 = new javax.swing.JButton();
+        jButton7 = new javax.swing.JButton();
+        jComboBox4 = new javax.swing.JComboBox();
+        jLabel25 = new javax.swing.JLabel();
+        jLabel26 = new javax.swing.JLabel();
+        jInternalFrame6 = new javax.swing.JInternalFrame();
+        jLabel19 = new javax.swing.JLabel();
+        jLabel20 = new javax.swing.JLabel();
+        jComboBox3 = new javax.swing.JComboBox();
+        jTextField18 = new javax.swing.JTextField();
+        jButton8 = new javax.swing.JButton();
+        jTextField20 = new javax.swing.JTextField();
+        jLabel23 = new javax.swing.JLabel();
+        jLabel24 = new javax.swing.JLabel();
+        jTextField21 = new javax.swing.JTextField();
+        jInternalFrame7 = new javax.swing.JInternalFrame();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        jTable2 = new javax.swing.JTable();
+        jButton9 = new javax.swing.JButton();
+        jButton19 = new javax.swing.JButton();
+        jInternalFrame8 = new javax.swing.JInternalFrame();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        jTable3 = new javax.swing.JTable();
+        jButton10 = new javax.swing.JButton();
+        jButton18 = new javax.swing.JButton();
+        jInternalFrame9 = new javax.swing.JInternalFrame();
+        jLabel21 = new javax.swing.JLabel();
+        jButton11 = new javax.swing.JButton();
+        jInternalFrame2 = new javax.swing.JInternalFrame();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        label4 = new java.awt.Label();
+        jLabel8 = new javax.swing.JLabel();
+        jButton3 = new javax.swing.JButton();
+        jTextField5 = new javax.swing.JTextField();
+        jTextField6 = new javax.swing.JTextField();
+        jTextField7 = new javax.swing.JTextField();
+        jTextField8 = new javax.swing.JTextField();
+        jTextField9 = new javax.swing.JTextField();
+        jTextField10 = new javax.swing.JTextField();
+        jTextField11 = new javax.swing.JTextField();
+        jTextField12 = new javax.swing.JTextField();
+        jLabel27 = new javax.swing.JLabel();
+        jLabel33 = new javax.swing.JLabel();
+        jButton24 = new javax.swing.JButton();
+        jInternalFrame10 = new javax.swing.JInternalFrame();
+        jLabel34 = new javax.swing.JLabel();
+        jScrollPane6 = new javax.swing.JScrollPane();
+        jTable4 = new javax.swing.JTable();
+        jButton20 = new javax.swing.JButton();
+        jButton21 = new javax.swing.JButton();
+        jInternalFrame11 = new javax.swing.JInternalFrame();
+        jTextField22 = new javax.swing.JTextField();
+        jLabel28 = new javax.swing.JLabel();
+        jLabel29 = new javax.swing.JLabel();
+        jPasswordField1 = new javax.swing.JPasswordField();
+        jLabel30 = new javax.swing.JLabel();
+        jPasswordField2 = new javax.swing.JPasswordField();
+        jButton17 = new javax.swing.JButton();
+        jComboBox5 = new javax.swing.JComboBox();
+        jLabel31 = new javax.swing.JLabel();
+        jInternalFrame12 = new javax.swing.JInternalFrame();
+        jComboBox8 = new javax.swing.JComboBox();
+        jButton23 = new javax.swing.JButton();
+        jLabel36 = new javax.swing.JLabel();
+        jToolBar1 = new javax.swing.JToolBar();
+        jButton12 = new javax.swing.JButton();
+        jButton14 = new javax.swing.JButton();
+        jToolBar2 = new javax.swing.JToolBar();
+        jButton15 = new javax.swing.JButton();
+        jButton16 = new javax.swing.JButton();
+        menuBar = new javax.swing.JMenuBar();
+        jMenu1 = new javax.swing.JMenu();
+        jMenuItem1 = new javax.swing.JMenuItem();
+        javax.swing.JMenuItem jMenuItem4 = new javax.swing.JMenuItem();
+        jMenu2 = new javax.swing.JMenu();
+        jMenuItem3 = new javax.swing.JMenuItem();
+        jMenuItem5 = new javax.swing.JMenuItem();
+        jMenuItem9 = new javax.swing.JMenuItem();
+        jMenu3 = new javax.swing.JMenu();
+        jMenuItem6 = new javax.swing.JMenuItem();
+        jMenuItem7 = new javax.swing.JMenuItem();
+        jMenu4 = new javax.swing.JMenu();
+        jMenuItem10 = new javax.swing.JMenuItem();
+        jMenuItem11 = new javax.swing.JMenuItem();
+        javax.swing.JMenu helpMenu = new javax.swing.JMenu();
+        javax.swing.JMenuItem aboutMenuItem = new javax.swing.JMenuItem();
+        statusPanel = new javax.swing.JPanel();
+        javax.swing.JSeparator statusPanelSeparator = new javax.swing.JSeparator();
+        statusMessageLabel = new javax.swing.JLabel();
+        statusAnimationLabel = new javax.swing.JLabel();
+        progressBar = new javax.swing.JProgressBar();
+        jDialog1 = new javax.swing.JDialog();
+        jLabel35 = new javax.swing.JLabel();
+        jButton22 = new javax.swing.JButton();
+
+        mainPanel.setName("mainPanel"); // NOI18N
+
+        jDesktopPane1.setName("jDesktopPane1"); // NOI18N
+        jDesktopPane1.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            public void mouseMoved(java.awt.event.MouseEvent evt) {
+                jDesktopPane1MouseMoved(evt);
+            }
+        });
+
+        jInternalFrame1.setClosable(true);
+        jInternalFrame1.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
+        jInternalFrame1.setIconifiable(true);
+        jInternalFrame1.setMaximizable(true);
+        jInternalFrame1.setResizable(true);
+        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(smeinventorysystem.SMEInventorySystemApp.class).getContext().getResourceMap(SMEInventorySystemView.class);
+        jInternalFrame1.setTitle(resourceMap.getString("jInternalFrame1.title")); // NOI18N
+        jInternalFrame1.setAutoscrolls(true);
+        jInternalFrame1.setName("jInternalFrame1"); // NOI18N
+        jInternalFrame1.addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+                jInternalFrame1InternalFrameActivated(evt);
+            }
+            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            }
+        });
+
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Stationery", "Gift Items", "Electronics", "Perishables", "Others" }));
+        jComboBox1.setName("jComboBox1"); // NOI18N
+        jComboBox1.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBox1ItemStateChanged(evt);
+            }
+        });
+
+        label1.setName("label1"); // NOI18N
+        label1.setText(resourceMap.getString("label1.text")); // NOI18N
+
+        label2.setName("label2"); // NOI18N
+        label2.setText(resourceMap.getString("label2.text")); // NOI18N
+
+        label3.setName("label3"); // NOI18N
+        label3.setText(resourceMap.getString("label3.text")); // NOI18N
+
+        jTextField2.setName("jTextField2"); // NOI18N
+        jTextField2.addCaretListener(new javax.swing.event.CaretListener() {
+            public void caretUpdate(javax.swing.event.CaretEvent evt) {
+                jTextField2CaretUpdate(evt);
+            }
+        });
+        jTextField2.addInputMethodListener(new java.awt.event.InputMethodListener() {
+            public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
+                jTextField2CaretPositionChanged(evt);
+            }
+            public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
+            }
+        });
+
+        jButton1.setText(resourceMap.getString("jButton1.text")); // NOI18N
+        jButton1.setName("jButton1"); // NOI18N
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        jButton2.setText(resourceMap.getString("jButton2.text")); // NOI18N
+        jButton2.setName("jButton2"); // NOI18N
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
+        jLabel22.setText(resourceMap.getString("jLabel22.text")); // NOI18N
+        jLabel22.setName("jLabel22"); // NOI18N
+
+        jComboBox6.setName("jComboBox6"); // NOI18N
+
+        jLabel32.setForeground(resourceMap.getColor("jLabel32.foreground")); // NOI18N
+        jLabel32.setText(resourceMap.getString("jLabel32.text")); // NOI18N
+        jLabel32.setName("jLabel32"); // NOI18N
+
+        jComboBox7.setEditable(true);
+        jComboBox7.setName("jComboBox7"); // NOI18N
+
+        jScrollPane7.setName("jScrollPane7"); // NOI18N
+
+        jTable5.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null}
+            },
+            new String [] {
+                "Good", "Quantity", "Price"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
+        jTable5.setName("jTable5"); // NOI18N
+        jScrollPane7.setViewportView(jTable5);
+        jTable5.getColumnModel().getColumn(0).setHeaderValue(resourceMap.getString("jTable5.columnModel.title0")); // NOI18N
+        jTable5.getColumnModel().getColumn(1).setHeaderValue(resourceMap.getString("jTable5.columnModel.title1")); // NOI18N
+        jTable5.getColumnModel().getColumn(2).setHeaderValue(resourceMap.getString("jTable5.columnModel.title2")); // NOI18N
+
+        javax.swing.GroupLayout jInternalFrame1Layout = new javax.swing.GroupLayout(jInternalFrame1.getContentPane());
+        jInternalFrame1.getContentPane().setLayout(jInternalFrame1Layout);
+        jInternalFrame1Layout.setHorizontalGroup(
+            jInternalFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jInternalFrame1Layout.createSequentialGroup()
+                .addGroup(jInternalFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jInternalFrame1Layout.createSequentialGroup()
+                        .addGroup(jInternalFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jInternalFrame1Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(jInternalFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jButton1, javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jInternalFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(label2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(label1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addGroup(jInternalFrame1Layout.createSequentialGroup()
+                                .addGap(56, 56, 56)
+                                .addGroup(jInternalFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jLabel22)
+                                    .addComponent(label3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addGap(28, 28, 28)
+                        .addGroup(jInternalFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jComboBox7, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(jInternalFrame1Layout.createSequentialGroup()
+                                .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jLabel32, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jComboBox1, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jComboBox6, 0, 100, Short.MAX_VALUE)))
+                    .addGroup(jInternalFrame1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 306, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(28, Short.MAX_VALUE))
+        );
+        jInternalFrame1Layout.setVerticalGroup(
+            jInternalFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jInternalFrame1Layout.createSequentialGroup()
+                .addGap(22, 22, 22)
+                .addGroup(jInternalFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(label1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jComboBox7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jInternalFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jInternalFrame1Layout.createSequentialGroup()
+                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(13, 13, 13)
+                        .addGroup(jInternalFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jComboBox6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel22)))
+                    .addComponent(label2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jInternalFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jInternalFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel32, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(label3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jInternalFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton1)
+                    .addComponent(jButton2))
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(62, Short.MAX_VALUE))
+        );
+
+        jInternalFrame1.setBounds(0, 30, 360, 400);
+        jDesktopPane1.add(jInternalFrame1, javax.swing.JLayeredPane.DEFAULT_LAYER);
+
+        jInternalFrame3.setClosable(true);
+        jInternalFrame3.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
+        jInternalFrame3.setIconifiable(true);
+        jInternalFrame3.setMaximizable(true);
+        jInternalFrame3.setResizable(true);
+        jInternalFrame3.setTitle(resourceMap.getString("jInternalFrame3.title")); // NOI18N
+        jInternalFrame3.setAutoscrolls(true);
+        jInternalFrame3.setName("jInternalFrame3"); // NOI18N
+        jInternalFrame3.setPreferredSize(new java.awt.Dimension(576, 510));
+        jInternalFrame3.addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+                jInternalFrame3InternalFrameActivated(evt);
+            }
+            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            }
+        });
+
+        jLabel9.setText(resourceMap.getString("jLabel9.text")); // NOI18N
+        jLabel9.setName("jLabel9"); // NOI18N
+
+        jTextField3.setName("jTextField3"); // NOI18N
+        jTextField3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField3ActionPerformed(evt);
+            }
+        });
+
+        jLabel10.setText(resourceMap.getString("jLabel10.text")); // NOI18N
+        jLabel10.setName("jLabel10"); // NOI18N
+
+        jScrollPane1.setName("jScrollPane1"); // NOI18N
+
+        jTextArea1.setColumns(20);
+        jTextArea1.setRows(5);
+        jTextArea1.setName("jTextArea1"); // NOI18N
+        jScrollPane1.setViewportView(jTextArea1);
+
+        jLabel11.setText(resourceMap.getString("jLabel11.text")); // NOI18N
+        jLabel11.setName("jLabel11"); // NOI18N
+
+        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Stationery", "Gift Items", "Electronics", "Perishables", "Others" }));
+        jComboBox2.setName("jComboBox2"); // NOI18N
+
+        jLabel12.setText(resourceMap.getString("jLabel12.text")); // NOI18N
+        jLabel12.setName("jLabel12"); // NOI18N
+
+        jTextField4.setName("jTextField4"); // NOI18N
+
+        jButton4.setText(resourceMap.getString("jButton4.text")); // NOI18N
+        jButton4.setName("jButton4"); // NOI18N
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jInternalFrame3Layout = new javax.swing.GroupLayout(jInternalFrame3.getContentPane());
+        jInternalFrame3.getContentPane().setLayout(jInternalFrame3Layout);
+        jInternalFrame3Layout.setHorizontalGroup(
+            jInternalFrame3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jInternalFrame3Layout.createSequentialGroup()
+                .addGroup(jInternalFrame3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jInternalFrame3Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jInternalFrame3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jInternalFrame3Layout.createSequentialGroup()
+                                .addGap(20, 20, 20)
+                                .addComponent(jLabel9)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jInternalFrame3Layout.createSequentialGroup()
+                                .addComponent(jLabel11)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jInternalFrame3Layout.createSequentialGroup()
+                                .addComponent(jLabel12)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jInternalFrame3Layout.createSequentialGroup()
+                                .addComponent(jLabel10)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 233, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addGroup(jInternalFrame3Layout.createSequentialGroup()
+                        .addGap(119, 119, 119)
+                        .addComponent(jButton4)))
+                .addContainerGap(74, Short.MAX_VALUE))
+        );
+        jInternalFrame3Layout.setVerticalGroup(
+            jInternalFrame3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jInternalFrame3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jInternalFrame3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel9))
+                .addGroup(jInternalFrame3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jInternalFrame3Layout.createSequentialGroup()
+                        .addGap(18, 18, 18)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jInternalFrame3Layout.createSequentialGroup()
+                        .addGap(56, 56, 56)
+                        .addComponent(jLabel10)))
+                .addGap(18, 18, 18)
+                .addGroup(jInternalFrame3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel11)
+                    .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jInternalFrame3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel12)
+                    .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(40, 40, 40)
+                .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(18, Short.MAX_VALUE))
+        );
+
+        jInternalFrame3.setBounds(0, 0, 390, 340);
+        jDesktopPane1.add(jInternalFrame3, javax.swing.JLayeredPane.DEFAULT_LAYER);
+
+        jInternalFrame4.setClosable(true);
+        jInternalFrame4.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
+        jInternalFrame4.setIconifiable(true);
+        jInternalFrame4.setMaximizable(true);
+        jInternalFrame4.setResizable(true);
+        jInternalFrame4.setTitle(resourceMap.getString("jInternalFrame4.title")); // NOI18N
+        jInternalFrame4.setAutoscrolls(true);
+        jInternalFrame4.setName("jInternalFrame4"); // NOI18N
+        jInternalFrame4.addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+                jInternalFrame4InternalFrameActivated(evt);
+            }
+            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            }
+        });
+
+        jScrollPane2.setName("jScrollPane2"); // NOI18N
+
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null}
+            },
+            new String [] {
+                "Good", "Description", "Quantity"
+            }
+        ));
+        jTable1.setName("jTable1"); // NOI18N
+        jScrollPane2.setViewportView(jTable1);
+        jTable1.getColumnModel().getColumn(0).setHeaderValue(resourceMap.getString("jTable1.columnModel.title0")); // NOI18N
+        jTable1.getColumnModel().getColumn(1).setHeaderValue(resourceMap.getString("jTable1.columnModel.title1")); // NOI18N
+        jTable1.getColumnModel().getColumn(2).setHeaderValue(resourceMap.getString("jTable1.columnModel.title2")); // NOI18N
+
+        jButton5.setText(resourceMap.getString("jButton5.text")); // NOI18N
+        jButton5.setName("jButton5"); // NOI18N
+        jButton5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton5ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jInternalFrame4Layout = new javax.swing.GroupLayout(jInternalFrame4.getContentPane());
+        jInternalFrame4.getContentPane().setLayout(jInternalFrame4Layout);
+        jInternalFrame4Layout.setHorizontalGroup(
+            jInternalFrame4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jInternalFrame4Layout.createSequentialGroup()
+                .addGroup(jInternalFrame4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jInternalFrame4Layout.createSequentialGroup()
+                        .addGap(144, 144, 144)
+                        .addComponent(jButton5))
+                    .addGroup(jInternalFrame4Layout.createSequentialGroup()
+                        .addGap(19, 19, 19)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 579, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        jInternalFrame4Layout.setVerticalGroup(
+            jInternalFrame4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jInternalFrame4Layout.createSequentialGroup()
+                .addGap(30, 30, 30)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jButton5)
+                .addContainerGap(361, Short.MAX_VALUE))
+        );
+
+        jInternalFrame4.setBounds(0, 0, -1, -1);
+        jDesktopPane1.add(jInternalFrame4, javax.swing.JLayeredPane.DEFAULT_LAYER);
+
+        jInternalFrame5.setClosable(true);
+        jInternalFrame5.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
+        jInternalFrame5.setIconifiable(true);
+        jInternalFrame5.setMaximizable(true);
+        jInternalFrame5.setResizable(true);
+        jInternalFrame5.setTitle(resourceMap.getString("jInternalFrame5.title")); // NOI18N
+        jInternalFrame5.setAutoscrolls(true);
+        jInternalFrame5.setName("jInternalFrame5"); // NOI18N
+        jInternalFrame5.addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+                jInternalFrame5InternalFrameActivated(evt);
+            }
+            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            }
+        });
+
+        jLabel13.setText(resourceMap.getString("jLabel13.text")); // NOI18N
+        jLabel13.setName("jLabel13"); // NOI18N
+
+        jTextField13.setName("jTextField13"); // NOI18N
+        jTextField13.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField13ActionPerformed(evt);
+            }
+        });
+
+        jLabel14.setText(resourceMap.getString("jLabel14.text")); // NOI18N
+        jLabel14.setName("jLabel14"); // NOI18N
+
+        jScrollPane3.setName("jScrollPane3"); // NOI18N
+
+        jTextArea2.setColumns(20);
+        jTextArea2.setRows(5);
+        jTextArea2.setName("jTextArea2"); // NOI18N
+        jScrollPane3.setViewportView(jTextArea2);
+
+        jLabel15.setText(resourceMap.getString("jLabel15.text")); // NOI18N
+        jLabel15.setName("jLabel15"); // NOI18N
+
+        jTextField14.setName("jTextField14"); // NOI18N
+
+        jLabel16.setText(resourceMap.getString("jLabel16.text")); // NOI18N
+        jLabel16.setName("jLabel16"); // NOI18N
+
+        jTextField15.setName("jTextField15"); // NOI18N
+
+        jLabel17.setText(resourceMap.getString("jLabel17.text")); // NOI18N
+        jLabel17.setName("jLabel17"); // NOI18N
+
+        jTextField16.setName("jTextField16"); // NOI18N
+
+        jTextField17.setName("jTextField17"); // NOI18N
+
+        jLabel18.setText(resourceMap.getString("jLabel18.text")); // NOI18N
+        jLabel18.setName("jLabel18"); // NOI18N
+
+        jButton6.setText(resourceMap.getString("jButton6.text")); // NOI18N
+        jButton6.setName("jButton6"); // NOI18N
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
+
+        jButton7.setText(resourceMap.getString("jButton7.text")); // NOI18N
+        jButton7.setName("jButton7"); // NOI18N
+
+        jComboBox4.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Store Keeper", "Sales Personnel", "Administrator" }));
+        jComboBox4.setName("jComboBox4"); // NOI18N
+        jComboBox4.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBox4ItemStateChanged(evt);
+            }
+        });
+
+        jLabel25.setText(resourceMap.getString("jLabel25.text")); // NOI18N
+        jLabel25.setName("jLabel25"); // NOI18N
+
+        jLabel26.setName("jLabel26"); // NOI18N
+
+        javax.swing.GroupLayout jInternalFrame5Layout = new javax.swing.GroupLayout(jInternalFrame5.getContentPane());
+        jInternalFrame5.getContentPane().setLayout(jInternalFrame5Layout);
+        jInternalFrame5Layout.setHorizontalGroup(
+            jInternalFrame5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jInternalFrame5Layout.createSequentialGroup()
+                .addGroup(jInternalFrame5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jInternalFrame5Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jInternalFrame5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jInternalFrame5Layout.createSequentialGroup()
+                                .addComponent(jLabel13)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jTextField13, javax.swing.GroupLayout.PREFERRED_SIZE, 214, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jInternalFrame5Layout.createSequentialGroup()
+                                .addGap(35, 35, 35)
+                                .addGroup(jInternalFrame5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(jInternalFrame5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jLabel14)
+                                        .addComponent(jLabel15))
+                                    .addComponent(jLabel25))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(jInternalFrame5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jComboBox4, javax.swing.GroupLayout.Alignment.TRAILING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jTextField14, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING)))))
+                    .addGroup(jInternalFrame5Layout.createSequentialGroup()
+                        .addGap(205, 205, 205)
+                        .addComponent(jLabel26))
+                    .addGroup(jInternalFrame5Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jInternalFrame5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jInternalFrame5Layout.createSequentialGroup()
+                                .addGap(21, 21, 21)
+                                .addGroup(jInternalFrame5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jLabel18)
+                                    .addComponent(jLabel17)
+                                    .addComponent(jLabel16))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(jInternalFrame5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jTextField16)
+                                    .addComponent(jTextField15, javax.swing.GroupLayout.DEFAULT_SIZE, 65, Short.MAX_VALUE)
+                                    .addComponent(jTextField17, javax.swing.GroupLayout.Alignment.TRAILING)))
+                            .addGroup(jInternalFrame5Layout.createSequentialGroup()
+                                .addComponent(jButton6)
+                                .addGap(50, 50, 50)
+                                .addComponent(jButton7)))))
+                .addContainerGap(125, Short.MAX_VALUE))
+        );
+        jInternalFrame5Layout.setVerticalGroup(
+            jInternalFrame5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jInternalFrame5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jInternalFrame5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel13)
+                    .addComponent(jTextField13, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jInternalFrame5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel14)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jInternalFrame5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField14, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel15))
+                .addGap(11, 11, 11)
+                .addGroup(jInternalFrame5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jComboBox4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel25))
+                .addGap(18, 18, 18)
+                .addGroup(jInternalFrame5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField15, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel16))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jInternalFrame5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel17)
+                    .addComponent(jTextField16, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jInternalFrame5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField17, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel18))
+                .addGap(9, 9, 9)
+                .addGroup(jInternalFrame5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton7)
+                    .addComponent(jButton6))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 98, Short.MAX_VALUE)
+                .addComponent(jLabel26)
+                .addGap(40, 40, 40))
+        );
+
+        jInternalFrame5.setBounds(0, 0, -1, -1);
+        jDesktopPane1.add(jInternalFrame5, javax.swing.JLayeredPane.DEFAULT_LAYER);
+
+        jInternalFrame6.setClosable(true);
+        jInternalFrame6.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
+        jInternalFrame6.setIconifiable(true);
+        jInternalFrame6.setMaximizable(true);
+        jInternalFrame6.setResizable(true);
+        jInternalFrame6.setTitle(resourceMap.getString("jInternalFrame6.title")); // NOI18N
+        jInternalFrame6.setAutoscrolls(true);
+        jInternalFrame6.setName("jInternalFrame6"); // NOI18N
+        jInternalFrame6.addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+                jInternalFrame6InternalFrameActivated(evt);
+            }
+            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            }
+        });
+
+        jLabel19.setText(resourceMap.getString("jLabel19.text")); // NOI18N
+        jLabel19.setName("jLabel19"); // NOI18N
+
+        jLabel20.setText(resourceMap.getString("jLabel20.text")); // NOI18N
+        jLabel20.setName("jLabel20"); // NOI18N
+
+        jComboBox3.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jComboBox3.setName("jComboBox3"); // NOI18N
+
+        jTextField18.setName("jTextField18"); // NOI18N
+
+        jButton8.setText(resourceMap.getString("jButton8.text")); // NOI18N
+        jButton8.setName("jButton8"); // NOI18N
+        jButton8.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton8ActionPerformed(evt);
+            }
+        });
+
+        jTextField20.setName("jTextField20"); // NOI18N
+        jTextField20.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField20ActionPerformed(evt);
+            }
+        });
+
+        jLabel23.setText(resourceMap.getString("jLabel23.text")); // NOI18N
+        jLabel23.setName("jLabel23"); // NOI18N
+
+        jLabel24.setText(resourceMap.getString("jLabel24.text")); // NOI18N
+        jLabel24.setName("jLabel24"); // NOI18N
+
+        jTextField21.setName("jTextField21"); // NOI18N
+
+        javax.swing.GroupLayout jInternalFrame6Layout = new javax.swing.GroupLayout(jInternalFrame6.getContentPane());
+        jInternalFrame6.getContentPane().setLayout(jInternalFrame6Layout);
+        jInternalFrame6Layout.setHorizontalGroup(
+            jInternalFrame6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jInternalFrame6Layout.createSequentialGroup()
+                .addGroup(jInternalFrame6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jInternalFrame6Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jInternalFrame6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(jInternalFrame6Layout.createSequentialGroup()
+                                .addGroup(jInternalFrame6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jLabel20)
+                                    .addComponent(jLabel19)
+                                    .addComponent(jLabel23))
+                                .addGap(18, 18, 18)
+                                .addGroup(jInternalFrame6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jTextField18)
+                                    .addComponent(jComboBox3, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addGroup(jInternalFrame6Layout.createSequentialGroup()
+                                        .addGap(2, 2, 2)
+                                        .addComponent(jTextField20, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addGroup(jInternalFrame6Layout.createSequentialGroup()
+                                .addComponent(jLabel24)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jTextField21))))
+                    .addGroup(jInternalFrame6Layout.createSequentialGroup()
+                        .addGap(115, 115, 115)
+                        .addComponent(jButton8)))
+                .addContainerGap(120, Short.MAX_VALUE))
+        );
+        jInternalFrame6Layout.setVerticalGroup(
+            jInternalFrame6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jInternalFrame6Layout.createSequentialGroup()
+                .addGap(23, 23, 23)
+                .addGroup(jInternalFrame6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel19)
+                    .addComponent(jTextField18, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jInternalFrame6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel20)
+                    .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jInternalFrame6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel23)
+                    .addComponent(jTextField20, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jInternalFrame6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel24, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextField21, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(51, 51, 51)
+                .addComponent(jButton8)
+                .addContainerGap(332, Short.MAX_VALUE))
+        );
+
+        jInternalFrame6.setBounds(0, 0, -1, -1);
+        jDesktopPane1.add(jInternalFrame6, javax.swing.JLayeredPane.DEFAULT_LAYER);
+
+        jInternalFrame7.setClosable(true);
+        jInternalFrame7.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
+        jInternalFrame7.setIconifiable(true);
+        jInternalFrame7.setMaximizable(true);
+        jInternalFrame7.setResizable(true);
+        jInternalFrame7.setTitle(resourceMap.getString("jInternalFrame7.title")); // NOI18N
+        jInternalFrame7.setAutoscrolls(true);
+        jInternalFrame7.setName("jInternalFrame7"); // NOI18N
+        jInternalFrame7.addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+                jInternalFrame7InternalFrameActivated(evt);
+            }
+            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            }
+        });
+
+        jScrollPane4.setName("jScrollPane4"); // NOI18N
+
+        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null}
+            },
+            new String [] {
+                "Good", "Amount", "Quantity"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Object.class, java.lang.Object.class, java.lang.Integer.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
+        jTable2.setName("jTable2"); // NOI18N
+        jScrollPane4.setViewportView(jTable2);
+        jTable2.getColumnModel().getColumn(0).setHeaderValue(resourceMap.getString("jTable2.columnModel.title0")); // NOI18N
+        jTable2.getColumnModel().getColumn(1).setHeaderValue(resourceMap.getString("jTable2.columnModel.title1")); // NOI18N
+        jTable2.getColumnModel().getColumn(2).setHeaderValue(resourceMap.getString("jTable2.columnModel.title2")); // NOI18N
+
+        jButton9.setText(resourceMap.getString("jButton9.text")); // NOI18N
+        jButton9.setName("jButton9"); // NOI18N
+        jButton9.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton9ActionPerformed(evt);
+            }
+        });
+
+        jButton19.setText(resourceMap.getString("jButton19.text")); // NOI18N
+        jButton19.setName("jButton19"); // NOI18N
+        jButton19.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton19ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jInternalFrame7Layout = new javax.swing.GroupLayout(jInternalFrame7.getContentPane());
+        jInternalFrame7.getContentPane().setLayout(jInternalFrame7Layout);
+        jInternalFrame7Layout.setHorizontalGroup(
+            jInternalFrame7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jInternalFrame7Layout.createSequentialGroup()
+                .addGroup(jInternalFrame7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jInternalFrame7Layout.createSequentialGroup()
+                        .addGap(94, 94, 94)
+                        .addComponent(jButton9)
+                        .addGap(32, 32, 32)
+                        .addComponent(jButton19))
+                    .addGroup(jInternalFrame7Layout.createSequentialGroup()
+                        .addGap(18, 18, 18)
+                        .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 412, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        jInternalFrame7Layout.setVerticalGroup(
+            jInternalFrame7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jInternalFrame7Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jInternalFrame7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton9)
+                    .addComponent(jButton19))
+                .addContainerGap(250, Short.MAX_VALUE))
+        );
+
+        jInternalFrame7.setBounds(0, 0, -1, -1);
+        jDesktopPane1.add(jInternalFrame7, javax.swing.JLayeredPane.DEFAULT_LAYER);
+
+        jInternalFrame8.setClosable(true);
+        jInternalFrame8.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
+        jInternalFrame8.setIconifiable(true);
+        jInternalFrame8.setMaximizable(true);
+        jInternalFrame8.setResizable(true);
+        jInternalFrame8.setTitle(resourceMap.getString("jInternalFrame8.title")); // NOI18N
+        jInternalFrame8.setAutoscrolls(true);
+        jInternalFrame8.setName("jInternalFrame8"); // NOI18N
+        jInternalFrame8.addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+                jInternalFrame8InternalFrameActivated(evt);
+            }
+            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            }
+        });
+
+        jScrollPane5.setName("jScrollPane5"); // NOI18N
+
+        jTable3.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null}
+            },
+            new String [] {
+                "Good", "Quantity", "Price"
+            }
+        ));
+        jTable3.setName("jTable3"); // NOI18N
+        jScrollPane5.setViewportView(jTable3);
+        jTable3.getColumnModel().getColumn(0).setHeaderValue(resourceMap.getString("jTable3.columnModel.title0")); // NOI18N
+        jTable3.getColumnModel().getColumn(1).setHeaderValue(resourceMap.getString("jTable3.columnModel.title1")); // NOI18N
+        jTable3.getColumnModel().getColumn(2).setHeaderValue(resourceMap.getString("jTable3.columnModel.title2")); // NOI18N
+
+        jButton10.setText(resourceMap.getString("jButton10.text")); // NOI18N
+        jButton10.setName("jButton10"); // NOI18N
+        jButton10.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton10ActionPerformed(evt);
+            }
+        });
+
+        jButton18.setText(resourceMap.getString("jButton18.text")); // NOI18N
+        jButton18.setName("jButton18"); // NOI18N
+        jButton18.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton18ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jInternalFrame8Layout = new javax.swing.GroupLayout(jInternalFrame8.getContentPane());
+        jInternalFrame8.getContentPane().setLayout(jInternalFrame8Layout);
+        jInternalFrame8Layout.setHorizontalGroup(
+            jInternalFrame8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jInternalFrame8Layout.createSequentialGroup()
+                .addGroup(jInternalFrame8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jInternalFrame8Layout.createSequentialGroup()
+                        .addGap(82, 82, 82)
+                        .addComponent(jButton10)
+                        .addGap(31, 31, 31)
+                        .addComponent(jButton18))
+                    .addGroup(jInternalFrame8Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 359, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        jInternalFrame8Layout.setVerticalGroup(
+            jInternalFrame8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jInternalFrame8Layout.createSequentialGroup()
+                .addGap(32, 32, 32)
+                .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 171, Short.MAX_VALUE)
+                .addGroup(jInternalFrame8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton10)
+                    .addComponent(jButton18))
+                .addGap(47, 47, 47))
+        );
+
+        jInternalFrame8.setBounds(0, 0, -1, -1);
+        jDesktopPane1.add(jInternalFrame8, javax.swing.JLayeredPane.DEFAULT_LAYER);
+
+        jInternalFrame9.setClosable(true);
+        jInternalFrame9.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
+        jInternalFrame9.setIconifiable(true);
+        jInternalFrame9.setMaximizable(true);
+        jInternalFrame9.setResizable(true);
+        jInternalFrame9.setTitle(resourceMap.getString("jInternalFrame9.title")); // NOI18N
+        jInternalFrame9.setName("jInternalFrame9"); // NOI18N
+        jInternalFrame9.addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+                jInternalFrame9InternalFrameActivated(evt);
+            }
+            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            }
+        });
+
+        jLabel21.setText(resourceMap.getString("jLabel21.text")); // NOI18N
+        jLabel21.setName("jLabel21"); // NOI18N
+
+        jButton11.setText(resourceMap.getString("jButton11.text")); // NOI18N
+        jButton11.setName("jButton11"); // NOI18N
+        jButton11.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton11ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jInternalFrame9Layout = new javax.swing.GroupLayout(jInternalFrame9.getContentPane());
+        jInternalFrame9.getContentPane().setLayout(jInternalFrame9Layout);
+        jInternalFrame9Layout.setHorizontalGroup(
+            jInternalFrame9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jInternalFrame9Layout.createSequentialGroup()
+                .addGroup(jInternalFrame9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel21, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jInternalFrame9Layout.createSequentialGroup()
+                        .addComponent(jButton11)
+                        .addGap(41, 41, 41)))
+                .addContainerGap(191, Short.MAX_VALUE))
+        );
+        jInternalFrame9Layout.setVerticalGroup(
+            jInternalFrame9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jInternalFrame9Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel21)
+                .addGap(30, 30, 30)
+                .addComponent(jButton11)
+                .addContainerGap(145, Short.MAX_VALUE))
+        );
+
+        jInternalFrame9.setBounds(0, 0, -1, -1);
+        jDesktopPane1.add(jInternalFrame9, javax.swing.JLayeredPane.DEFAULT_LAYER);
+
+        jInternalFrame2.setClosable(true);
+        jInternalFrame2.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
+        jInternalFrame2.setIconifiable(true);
+        jInternalFrame2.setMaximizable(true);
+        jInternalFrame2.setTitle(resourceMap.getString("jInternalFrame2.title")); // NOI18N
+        jInternalFrame2.setAutoscrolls(true);
+        jInternalFrame2.setName("jInternalFrame2"); // NOI18N
+        jInternalFrame2.addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+                jInternalFrame2InternalFrameActivated(evt);
+            }
+            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
+                jInternalFrame2InternalFrameClosing(evt);
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            }
+        });
+        jInternalFrame2.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jInternalFrame2FocusLost(evt);
+            }
+        });
+
+        jLabel1.setText(resourceMap.getString("jLabel1.text")); // NOI18N
+        jLabel1.setName("jLabel1"); // NOI18N
+
+        jLabel2.setText(resourceMap.getString("jLabel2.text")); // NOI18N
+        jLabel2.setName("jLabel2"); // NOI18N
+
+        jLabel3.setText(resourceMap.getString("jLabel3.text")); // NOI18N
+        jLabel3.setName("jLabel3"); // NOI18N
+
+        jLabel4.setText(resourceMap.getString("jLabel4.text")); // NOI18N
+        jLabel4.setName("jLabel4"); // NOI18N
+
+        jLabel5.setText(resourceMap.getString("jLabel5.text")); // NOI18N
+        jLabel5.setName("jLabel5"); // NOI18N
+
+        jLabel6.setText(resourceMap.getString("jLabel6.text")); // NOI18N
+        jLabel6.setName("jLabel6"); // NOI18N
+
+        jLabel7.setText(resourceMap.getString("jLabel7.text")); // NOI18N
+        jLabel7.setName("jLabel7"); // NOI18N
+
+        label4.setFont(resourceMap.getFont("label4.font")); // NOI18N
+        label4.setName("label4"); // NOI18N
+        label4.setText(resourceMap.getString("label4.text")); // NOI18N
+
+        jLabel8.setText(resourceMap.getString("jLabel8.text")); // NOI18N
+        jLabel8.setName("jLabel8"); // NOI18N
+
+        jButton3.setText(resourceMap.getString("jButton3.text")); // NOI18N
+        jButton3.setName("jButton3"); // NOI18N
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
+        jTextField5.setName("jTextField5"); // NOI18N
+
+        jTextField6.setName("jTextField6"); // NOI18N
+
+        jTextField7.setName("jTextField7"); // NOI18N
+
+        jTextField8.setName("jTextField8"); // NOI18N
+
+        jTextField9.setName("jTextField9"); // NOI18N
+
+        jTextField10.setName("jTextField10"); // NOI18N
+
+        jTextField11.setName("jTextField11"); // NOI18N
+
+        jTextField12.setName("jTextField12"); // NOI18N
+
+        jLabel27.setText(resourceMap.getString("jLabel27.text")); // NOI18N
+        jLabel27.setName("jLabel27"); // NOI18N
+
+        jLabel33.setForeground(resourceMap.getColor("jLabel33.foreground")); // NOI18N
+        jLabel33.setText(resourceMap.getString("jLabel33.text")); // NOI18N
+        jLabel33.setName("jLabel33"); // NOI18N
+
+        jButton24.setText(resourceMap.getString("jButton24.text")); // NOI18N
+        jButton24.setName("jButton24"); // NOI18N
+        jButton24.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton24ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jInternalFrame2Layout = new javax.swing.GroupLayout(jInternalFrame2.getContentPane());
+        jInternalFrame2.getContentPane().setLayout(jInternalFrame2Layout);
+        jInternalFrame2Layout.setHorizontalGroup(
+            jInternalFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jInternalFrame2Layout.createSequentialGroup()
+                .addGroup(jInternalFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jInternalFrame2Layout.createSequentialGroup()
+                        .addGap(37, 37, 37)
+                        .addGroup(jInternalFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel27, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 231, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jInternalFrame2Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jInternalFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(jInternalFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(jInternalFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jLabel2)
+                                    .addComponent(jLabel3)
+                                    .addComponent(jLabel4)
+                                    .addGroup(jInternalFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jLabel6)
+                                        .addGroup(jInternalFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                            .addComponent(label4, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(jLabel5))))
+                                .addGroup(jInternalFrame2Layout.createSequentialGroup()
+                                    .addGap(6, 6, 6)
+                                    .addComponent(jLabel7)))
+                            .addComponent(jLabel8))
+                        .addGap(18, 18, 18)
+                        .addGroup(jInternalFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jTextField11, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 79, Short.MAX_VALUE)
+                            .addComponent(jTextField10, javax.swing.GroupLayout.DEFAULT_SIZE, 79, Short.MAX_VALUE)
+                            .addComponent(jTextField6, javax.swing.GroupLayout.DEFAULT_SIZE, 79, Short.MAX_VALUE)
+                            .addComponent(jTextField7, javax.swing.GroupLayout.DEFAULT_SIZE, 79, Short.MAX_VALUE)
+                            .addComponent(jTextField5, javax.swing.GroupLayout.DEFAULT_SIZE, 79, Short.MAX_VALUE)
+                            .addComponent(jTextField8, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 79, Short.MAX_VALUE)
+                            .addComponent(jTextField9, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 79, Short.MAX_VALUE)
+                            .addComponent(jTextField12, javax.swing.GroupLayout.DEFAULT_SIZE, 79, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel33, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(185, 185, 185))
+                    .addGroup(jInternalFrame2Layout.createSequentialGroup()
+                        .addGap(106, 106, 106)
+                        .addGroup(jInternalFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jButton24)
+                            .addComponent(jButton3))))
+                .addContainerGap())
+        );
+        jInternalFrame2Layout.setVerticalGroup(
+            jInternalFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jInternalFrame2Layout.createSequentialGroup()
+                .addComponent(jLabel1)
+                .addGroup(jInternalFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jInternalFrame2Layout.createSequentialGroup()
+                        .addGap(4, 4, 4)
+                        .addComponent(jLabel27)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jInternalFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel2)
+                            .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jInternalFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jTextField6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel3))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jInternalFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel4))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jInternalFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel5))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jInternalFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel6)
+                            .addComponent(jTextField9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jInternalFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel7)
+                            .addComponent(jTextField10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jInternalFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jTextField11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(label4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jInternalFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jTextField12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel8))
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton3))
+                    .addGroup(jInternalFrame2Layout.createSequentialGroup()
+                        .addGap(49, 49, 49)
+                        .addComponent(jLabel33, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 20, Short.MAX_VALUE)
+                .addComponent(jButton24)
+                .addGap(58, 58, 58))
+        );
+
+        jInternalFrame2.setBounds(20, 10, -1, 427);
+        jDesktopPane1.add(jInternalFrame2, javax.swing.JLayeredPane.DEFAULT_LAYER);
+
+        jInternalFrame10.setClosable(true);
+        jInternalFrame10.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
+        jInternalFrame10.setIconifiable(true);
+        jInternalFrame10.setMaximizable(true);
+        jInternalFrame10.setResizable(true);
+        jInternalFrame10.setTitle(resourceMap.getString("jInternalFrame10.title")); // NOI18N
+        jInternalFrame10.setName("jInternalFrame10"); // NOI18N
+        jInternalFrame10.addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+                jInternalFrame10InternalFrameActivated(evt);
+            }
+            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            }
+        });
+
+        jLabel34.setText(resourceMap.getString("jLabel34.text")); // NOI18N
+        jLabel34.setName("jLabel34"); // NOI18N
+
+        jScrollPane6.setName("jScrollPane6"); // NOI18N
+
+        jTable4.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null}
+            },
+            new String [] {
+                "Name Of Good", "Category", "Prices"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, true
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jTable4.setName("jTable4"); // NOI18N
+        jTable4.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                jTable4PropertyChange(evt);
+            }
+        });
+        jScrollPane6.setViewportView(jTable4);
+        jTable4.getColumnModel().getColumn(0).setHeaderValue(resourceMap.getString("jTable4.columnModel.title0")); // NOI18N
+        jTable4.getColumnModel().getColumn(1).setHeaderValue(resourceMap.getString("jTable4.columnModel.title1")); // NOI18N
+        jTable4.getColumnModel().getColumn(2).setHeaderValue(resourceMap.getString("jTable4.columnModel.title2")); // NOI18N
+
+        jButton20.setText(resourceMap.getString("jButton20.text")); // NOI18N
+        jButton20.setName("jButton20"); // NOI18N
+        jButton20.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton20ActionPerformed(evt);
+            }
+        });
+
+        jButton21.setText(resourceMap.getString("jButton21.text")); // NOI18N
+        jButton21.setName("jButton21"); // NOI18N
+
+        javax.swing.GroupLayout jInternalFrame10Layout = new javax.swing.GroupLayout(jInternalFrame10.getContentPane());
+        jInternalFrame10.getContentPane().setLayout(jInternalFrame10Layout);
+        jInternalFrame10Layout.setHorizontalGroup(
+            jInternalFrame10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jInternalFrame10Layout.createSequentialGroup()
+                .addGroup(jInternalFrame10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jInternalFrame10Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jInternalFrame10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 334, Short.MAX_VALUE)
+                            .addComponent(jLabel34)))
+                    .addGroup(jInternalFrame10Layout.createSequentialGroup()
+                        .addGap(67, 67, 67)
+                        .addComponent(jButton20)
+                        .addGap(45, 45, 45)
+                        .addComponent(jButton21)))
+                .addContainerGap())
+        );
+        jInternalFrame10Layout.setVerticalGroup(
+            jInternalFrame10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jInternalFrame10Layout.createSequentialGroup()
+                .addGap(21, 21, 21)
+                .addComponent(jLabel34)
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addGroup(jInternalFrame10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton20)
+                    .addComponent(jButton21))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jInternalFrame10.setBounds(0, 10, 370, 270);
+        jDesktopPane1.add(jInternalFrame10, javax.swing.JLayeredPane.DEFAULT_LAYER);
+
+        jInternalFrame11.setClosable(true);
+        jInternalFrame11.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
+        jInternalFrame11.setIconifiable(true);
+        jInternalFrame11.setMaximizable(true);
+        jInternalFrame11.setResizable(true);
+        jInternalFrame11.setTitle(resourceMap.getString("jInternalFrame11.title")); // NOI18N
+        jInternalFrame11.setName("jInternalFrame11"); // NOI18N
+
+        jTextField22.setText(resourceMap.getString("jTextField22.text")); // NOI18N
+        jTextField22.setName("jTextField22"); // NOI18N
+
+        jLabel28.setText(resourceMap.getString("jLabel28.text")); // NOI18N
+        jLabel28.setName("jLabel28"); // NOI18N
+
+        jLabel29.setText(resourceMap.getString("jLabel29.text")); // NOI18N
+        jLabel29.setName("jLabel29"); // NOI18N
+
+        jPasswordField1.setText(resourceMap.getString("jPasswordField1.text")); // NOI18N
+        jPasswordField1.setName("jPasswordField1"); // NOI18N
+
+        jLabel30.setText(resourceMap.getString("jLabel30.text")); // NOI18N
+        jLabel30.setName("jLabel30"); // NOI18N
+
+        jPasswordField2.setText(resourceMap.getString("jPasswordField2.text")); // NOI18N
+        jPasswordField2.setName("jPasswordField2"); // NOI18N
+
+        jButton17.setText(resourceMap.getString("jButton17.text")); // NOI18N
+        jButton17.setName("jButton17"); // NOI18N
+        jButton17.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton17ActionPerformed(evt);
+            }
+        });
+
+        jComboBox5.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Admin", "Frontdesk", "Store" }));
+        jComboBox5.setName("jComboBox5"); // NOI18N
+
+        jLabel31.setText(resourceMap.getString("jLabel31.text")); // NOI18N
+        jLabel31.setName("jLabel31"); // NOI18N
+
+        javax.swing.GroupLayout jInternalFrame11Layout = new javax.swing.GroupLayout(jInternalFrame11.getContentPane());
+        jInternalFrame11.getContentPane().setLayout(jInternalFrame11Layout);
+        jInternalFrame11Layout.setHorizontalGroup(
+            jInternalFrame11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jInternalFrame11Layout.createSequentialGroup()
+                .addGroup(jInternalFrame11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jInternalFrame11Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jLabel28)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextField22, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jInternalFrame11Layout.createSequentialGroup()
+                        .addGap(79, 79, 79)
+                        .addComponent(jButton17))
+                    .addGroup(jInternalFrame11Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jInternalFrame11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jInternalFrame11Layout.createSequentialGroup()
+                                .addComponent(jLabel30)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jPasswordField2, javax.swing.GroupLayout.DEFAULT_SIZE, 131, Short.MAX_VALUE))
+                            .addGroup(jInternalFrame11Layout.createSequentialGroup()
+                                .addGroup(jInternalFrame11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel29)
+                                    .addComponent(jLabel31))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(jInternalFrame11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jPasswordField1, javax.swing.GroupLayout.DEFAULT_SIZE, 128, Short.MAX_VALUE)
+                                    .addComponent(jComboBox5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                .addGap(176, 176, 176))
+        );
+        jInternalFrame11Layout.setVerticalGroup(
+            jInternalFrame11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jInternalFrame11Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jInternalFrame11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel28)
+                    .addComponent(jTextField22, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jInternalFrame11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jComboBox5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel31))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jInternalFrame11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel29)
+                    .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jInternalFrame11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel30)
+                    .addComponent(jPasswordField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(jButton17)
+                .addGap(55, 55, 55))
+        );
+
+        jInternalFrame11.setBounds(10, 20, 290, 230);
+        jDesktopPane1.add(jInternalFrame11, javax.swing.JLayeredPane.DEFAULT_LAYER);
+
+        jInternalFrame12.setClosable(true);
+        jInternalFrame12.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
+        jInternalFrame12.setIconifiable(true);
+        jInternalFrame12.setMaximizable(true);
+        jInternalFrame12.setResizable(true);
+        jInternalFrame12.setTitle(resourceMap.getString("jInternalFrame12.title")); // NOI18N
+        jInternalFrame12.setName("jInternalFrame12"); // NOI18N
+        jInternalFrame12.addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+                jInternalFrame12InternalFrameActivated(evt);
+            }
+            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            }
+        });
+
+        jComboBox8.setName("jComboBox8"); // NOI18N
+
+        jButton23.setText(resourceMap.getString("jButton23.text")); // NOI18N
+        jButton23.setName("jButton23"); // NOI18N
+        jButton23.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton23ActionPerformed(evt);
+            }
+        });
+
+        jLabel36.setText(resourceMap.getString("jLabel36.text")); // NOI18N
+        jLabel36.setName("jLabel36"); // NOI18N
+
+        javax.swing.GroupLayout jInternalFrame12Layout = new javax.swing.GroupLayout(jInternalFrame12.getContentPane());
+        jInternalFrame12.getContentPane().setLayout(jInternalFrame12Layout);
+        jInternalFrame12Layout.setHorizontalGroup(
+            jInternalFrame12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jInternalFrame12Layout.createSequentialGroup()
+                .addGroup(jInternalFrame12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jInternalFrame12Layout.createSequentialGroup()
+                        .addGap(23, 23, 23)
+                        .addComponent(jLabel36)
+                        .addGap(29, 29, 29)
+                        .addComponent(jComboBox8, javax.swing.GroupLayout.PREFERRED_SIZE, 147, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jInternalFrame12Layout.createSequentialGroup()
+                        .addGap(58, 58, 58)
+                        .addComponent(jButton23)))
+                .addContainerGap(93, Short.MAX_VALUE))
+        );
+        jInternalFrame12Layout.setVerticalGroup(
+            jInternalFrame12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jInternalFrame12Layout.createSequentialGroup()
+                .addGap(26, 26, 26)
+                .addGroup(jInternalFrame12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jComboBox8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel36))
+                .addGap(35, 35, 35)
+                .addComponent(jButton23)
+                .addContainerGap(57, Short.MAX_VALUE))
+        );
+
+        jInternalFrame12.setBounds(0, 10, 330, 190);
+        jDesktopPane1.add(jInternalFrame12, javax.swing.JLayeredPane.DEFAULT_LAYER);
+
+        jToolBar1.setBackground(resourceMap.getColor("jToolBar1.background")); // NOI18N
+        jToolBar1.setForeground(resourceMap.getColor("jToolBar1.foreground")); // NOI18N
+        jToolBar1.setRollover(true);
+        jToolBar1.setName("jToolBar1"); // NOI18N
+
+        jButton12.setBackground(resourceMap.getColor("jButton12.background")); // NOI18N
+        jButton12.setIcon(resourceMap.getIcon("jButton12.icon")); // NOI18N
+        jButton12.setText(resourceMap.getString("jButton12.text")); // NOI18N
+        jButton12.setFocusable(false);
+        jButton12.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButton12.setName("jButton12"); // NOI18N
+        jButton12.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jButton12.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton12ActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(jButton12);
+
+        jButton14.setBackground(resourceMap.getColor("jButton14.background")); // NOI18N
+        jButton14.setIcon(resourceMap.getIcon("jButton14.icon")); // NOI18N
+        jButton14.setText(resourceMap.getString("jButton14.text")); // NOI18N
+        jButton14.setFocusable(false);
+        jButton14.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButton14.setName("jButton14"); // NOI18N
+        jButton14.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jButton14.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton14ActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(jButton14);
+
+        jToolBar2.setRollover(true);
+        jToolBar2.setName("jToolBar2"); // NOI18N
+
+        jButton15.setIcon(resourceMap.getIcon("jButton15.icon")); // NOI18N
+        jButton15.setText(resourceMap.getString("jButton15.text")); // NOI18N
+        jButton15.setFocusable(false);
+        jButton15.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButton15.setName("jButton15"); // NOI18N
+        jButton15.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jButton15.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton15ActionPerformed(evt);
+            }
+        });
+        jToolBar2.add(jButton15);
+
+        jButton16.setIcon(resourceMap.getIcon("jButton16.icon")); // NOI18N
+        jButton16.setText(resourceMap.getString("jButton16.text")); // NOI18N
+        jButton16.setFocusable(false);
+        jButton16.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButton16.setName("jButton16"); // NOI18N
+        jButton16.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jButton16.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton16ActionPerformed(evt);
+            }
+        });
+        jToolBar2.add(jButton16);
+
+        javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
+        mainPanel.setLayout(mainPanelLayout);
+        mainPanelLayout.setHorizontalGroup(
+            mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(mainPanelLayout.createSequentialGroup()
+                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 320, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jToolBar2, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(215, Short.MAX_VALUE))
+            .addComponent(jDesktopPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 733, Short.MAX_VALUE)
+        );
+        mainPanelLayout.setVerticalGroup(
+            mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(mainPanelLayout.createSequentialGroup()
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jToolBar2, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jDesktopPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 441, Short.MAX_VALUE))
+        );
+
+        menuBar.setBackground(resourceMap.getColor("menuBar.background")); // NOI18N
+        menuBar.setForeground(resourceMap.getColor("menuBar.foreground")); // NOI18N
+        menuBar.setName("menuBar"); // NOI18N
+
+        jMenu1.setText(resourceMap.getString("jMenu1.text")); // NOI18N
+        jMenu1.setName("jMenu1"); // NOI18N
+        jMenu1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenu1ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(smeinventorysystem.SMEInventorySystemApp.class).getContext().getActionMap(SMEInventorySystemView.class, this);
+        jMenuItem1.setAction(actionMap.get("jMenu1Clicked")); // NOI18N
+        jMenuItem1.setText(resourceMap.getString("jMenuItem1.text")); // NOI18N
+        jMenuItem1.setName("jMenuItem1"); // NOI18N
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem1);
+
+        jMenuItem4.setText(resourceMap.getString("jMenuItem4.text")); // NOI18N
+        jMenuItem4.setName("jMenuItem4"); // NOI18N
+        jMenuItem4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem4ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem4);
+
+        menuBar.add(jMenu1);
+
+        jMenu2.setText(resourceMap.getString("jMenu2.text")); // NOI18N
+        jMenu2.setName("jMenu2"); // NOI18N
+        jMenu2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenu2ActionPerformed(evt);
+            }
+        });
+
+        jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem3ActionPerformed(evt);
+            }
+        });
+        jMenu2.add(jMenuItem3);
+
+        jMenuItem5.setText(resourceMap.getString("jMenuItem5.text")); // NOI18N
+        jMenuItem5.setName("jMenuItem5"); // NOI18N
+        jMenuItem5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem5ActionPerformed(evt);
+            }
+        });
+        jMenu2.add(jMenuItem5);
+
+        jMenuItem9.setText(resourceMap.getString("jMenuItem9.text")); // NOI18N
+        jMenuItem9.setName("jMenuItem9"); // NOI18N
+        jMenuItem9.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem9ActionPerformed(evt);
+            }
+        });
+        jMenu2.add(jMenuItem9);
+
+        menuBar.add(jMenu2);
+
+        jMenu3.setText(resourceMap.getString("jMenu3.text")); // NOI18N
+        jMenu3.setName("jMenu3"); // NOI18N
+        jMenu3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenu3ActionPerformed(evt);
+            }
+        });
+
+        jMenuItem6.setText(resourceMap.getString("jMenuItem6.text")); // NOI18N
+        jMenuItem6.setName("jMenuItem6"); // NOI18N
+        jMenuItem6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem6ActionPerformed(evt);
+            }
+        });
+        jMenu3.add(jMenuItem6);
+
+        jMenuItem7.setText(resourceMap.getString("jMenuItem7.text")); // NOI18N
+        jMenuItem7.setName("jMenuItem7"); // NOI18N
+        jMenuItem7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem7ActionPerformed(evt);
+            }
+        });
+        jMenu3.add(jMenuItem7);
+
+        menuBar.add(jMenu3);
+
+        jMenu4.setText(resourceMap.getString("jMenu4.text")); // NOI18N
+        jMenu4.setName("jMenu4"); // NOI18N
+
+        jMenuItem10.setText(resourceMap.getString("jMenuItem10.text")); // NOI18N
+        jMenuItem10.setName("jMenuItem10"); // NOI18N
+        jMenuItem10.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem10ActionPerformed(evt);
+            }
+        });
+        jMenu4.add(jMenuItem10);
+
+        jMenuItem11.setText(resourceMap.getString("jMenuItem11.text")); // NOI18N
+        jMenuItem11.setName("jMenuItem11"); // NOI18N
+        jMenuItem11.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem11ActionPerformed(evt);
+            }
+        });
+        jMenu4.add(jMenuItem11);
+
+        menuBar.add(jMenu4);
+
+        helpMenu.setText(resourceMap.getString("helpMenu.text")); // NOI18N
+        helpMenu.setName("helpMenu"); // NOI18N
+
+        aboutMenuItem.setAction(actionMap.get("showAboutBox")); // NOI18N
+        aboutMenuItem.setName("aboutMenuItem"); // NOI18N
+        helpMenu.add(aboutMenuItem);
+
+        menuBar.add(helpMenu);
+
+        menuBar.getAccessibleContext().setAccessibleParent(mainPanel);
+
+        statusPanel.setName("statusPanel"); // NOI18N
+
+        statusPanelSeparator.setName("statusPanelSeparator"); // NOI18N
+
+        statusMessageLabel.setName("statusMessageLabel"); // NOI18N
+
+        statusAnimationLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        statusAnimationLabel.setName("statusAnimationLabel"); // NOI18N
+
+        progressBar.setName("progressBar"); // NOI18N
+
+        javax.swing.GroupLayout statusPanelLayout = new javax.swing.GroupLayout(statusPanel);
+        statusPanel.setLayout(statusPanelLayout);
+        statusPanelLayout.setHorizontalGroup(
+            statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 733, Short.MAX_VALUE)
+            .addGroup(statusPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(statusMessageLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 713, Short.MAX_VALUE)
+                .addComponent(statusAnimationLabel)
+                .addContainerGap())
+            .addGroup(statusPanelLayout.createSequentialGroup()
+                .addGap(491, 491, 491)
+                .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, 223, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(19, Short.MAX_VALUE))
+        );
+        statusPanelLayout.setVerticalGroup(
+            statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(statusPanelLayout.createSequentialGroup()
+                .addComponent(statusPanelSeparator, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(statusMessageLabel)
+                    .addComponent(statusAnimationLabel)
+                    .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(3, 3, 3))
+        );
+
+        jDialog1.setModalityType(java.awt.Dialog.ModalityType.DOCUMENT_MODAL);
+        jDialog1.setName("jDialog1"); // NOI18N
+
+        jLabel35.setText(resourceMap.getString("jLabel35.text")); // NOI18N
+        jLabel35.setName("jLabel35"); // NOI18N
+
+        jButton22.setText(resourceMap.getString("jButton22.text")); // NOI18N
+        jButton22.setName("jButton22"); // NOI18N
+        jButton22.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton22ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jDialog1Layout = new javax.swing.GroupLayout(jDialog1.getContentPane());
+        jDialog1.getContentPane().setLayout(jDialog1Layout);
+        jDialog1Layout.setHorizontalGroup(
+            jDialog1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jDialog1Layout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addGroup(jDialog1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jButton22)
+                    .addComponent(jLabel35))
+                .addContainerGap(27, Short.MAX_VALUE))
+        );
+        jDialog1Layout.setVerticalGroup(
+            jDialog1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jDialog1Layout.createSequentialGroup()
+                .addGap(19, 19, 19)
+                .addComponent(jLabel35)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jButton22)
+                .addContainerGap(22, Short.MAX_VALUE))
+        );
+
+        setComponent(mainPanel);
+        setMenuBar(menuBar);
+        setStatusBar(statusPanel);
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        // TODO add your handling code here:
+        jInternalFrame1.setVisible(true);
+//        jInternalFrame1.setSize(500, 300);
+}//GEN-LAST:event_jMenuItem1ActionPerformed
+public void printReport(javax.swing.JTable s, String t[], String path) {
+ BufferedWriter out = null;
+ String k = "<html><head><title>Report</title>";
+k = k + "<style type=text/css><!-- .style10 {font-family: Arial, Helvetica, sans-serif; font-size: 12px; }.style11 {font-family: Agency FB, Juice ITC; font-size: 24px; }--></style>";
+k = k + "</head><body><div align=center class=style10><p><img src=5.jpg width=54 height=67 alt=logo /><strong>Report</strong></p></div>";
+k = k + "<div align=center style=border:double><strong><span class=style11>REPORT</span></strong></div>";
+k = k + "<table width=430 border=1>";
+for (int q = 0; q <= t.length-1; q++) {
+k = k + "<th width=100><span class=style10>"+ t[q] + "</span></th>";
+}
+
+
+k = k + "</tr>";
+for (int z = 0; z <= s.getRowCount()-1; z++) {
+    if (s.getValueAt(z, 0) != null) {
+    k = k + "<tr>";
+    for (int a = 0; a <= s.getColumnCount()-1; a++) {
+k = k + "<th><span class=style10>" + s.getValueAt(z, a) + "</span></th>";
+    }
+    k = k + "</tr>";
+  }
+    }
+k = k + "</tr></table></body></html>";
+
+try {
+File file = new File(path);
+if (file.exists()) file.delete();
+out = new BufferedWriter(new FileWriter(file,true));
+
+out.write(k);
+
+out.close();
+} catch(IOException e) {}
+
+}
+
+    	private void close() {
+		try {
+			if (resultSet != null) {
+				resultSet.close();
+			}
+
+			if (statement != null) {
+				statement.close();
+			}
+
+			if (connect != null) {
+				connect.close();
+			}
+		} catch (Exception e) {
+
+		}
+	}
+
+    private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem4ActionPerformed
+        // TODO add your handling code here:
+        System.exit(0);
+}//GEN-LAST:event_jMenuItem4ActionPerformed
+
+    private void jMenu1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenu1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jMenu1ActionPerformed
+
+    private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
+        // TODO add your handling code here:
+        jInternalFrame4.setVisible(true);
+}//GEN-LAST:event_jMenuItem3ActionPerformed
+
+    private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem5ActionPerformed
+        // TODO add your handling code here:
+        jInternalFrame3.setVisible(true);
+}//GEN-LAST:event_jMenuItem5ActionPerformed
+
+    private void jMenu2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenu2ActionPerformed
+        // TODO add your handling code here:
+        jInternalFrame4.setVisible(true);
+}//GEN-LAST:event_jMenu2ActionPerformed
+
+    private void jMenuItem6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem6ActionPerformed
+        // TODO add your handling code here:
+        jInternalFrame7.setVisible(true);
+}//GEN-LAST:event_jMenuItem6ActionPerformed
+
+    private void jMenu3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenu3ActionPerformed
+        // TODO add your handling code here:
+        jInternalFrame8.setVisible(true);
+}//GEN-LAST:event_jMenu3ActionPerformed
+
+    private void jInternalFrame2InternalFrameActivated(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_jInternalFrame2InternalFrameActivated
+jInternalFrame2.setSize(372, 426);
+        jLabel33.setText("0");
+jLabel33.setVisible(false);
+jTextField5.setText("");jTextField5.setEnabled(true);
+jTextField6.setText("");jTextField6.setEnabled(true);
+jTextField7.setText("");jTextField7.setEnabled(true);
+jTextField8.setText("");jTextField8.setEnabled(true);
+jTextField9.setText("");jTextField9.setEnabled(true);
+jTextField10.setText("");jTextField10.setEnabled(true);
+jTextField11.setText("");jTextField11.setEnabled(true);
+jTextField12.setText("");jTextField12.setEnabled(true);
+        jLabel27.setText("Customer = " + customer);
+try {
+            Class.forName("com.mysql.jdbc.Driver");
+            connect = DriverManager.getConnection(connectionUrl);
+            statement = connect.createStatement();
+
+preparedStatement = connect.prepareStatement("select * from inventory_db.basket where CustomerName = ? and Session = ?");
+preparedStatement.setString(1, customer);
+preparedStatement.setString(2, new Integer(session).toString());
+
+preparedStatement.execute();
+            resultSet = preparedStatement.getResultSet();
+                 while (resultSet.next()) {
+                     price = price + new Double(resultSet.getString("Price")).doubleValue();
+                 }
+            jLabel1.setText("Expected Money = " + price);
+        }
+catch (Exception e) {
+    System.out.println("Ah");
+}
+}//GEN-LAST:event_jInternalFrame2InternalFrameActivated
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        String connectionUrl = "jdbc:mysql://localhost:3306/inventory_db?" +
+                "user=root&password=red";
+
+        try {
+            // This will load the MySQL driver, each DB has its own driver
+            Class.forName("com.mysql.jdbc.Driver");
+            // Setup the connection with the DB
+            connect = DriverManager.getConnection(connectionUrl);
+
+            // Statements allow to issue SQL queries to the database
+            statement = connect.createStatement();
+            // Result set get the result of the SQL query
+            //Shopping basket table text1, 19, 2, combo 1
+            String custName = (String)jComboBox7.getSelectedItem();
+            String good = (String)jComboBox6.getSelectedItem();
+            String quantity = jTextField2.getText();
+            String newquantity = null;
+            String category = null;
+            double price = 3;
+            int sess = -2;
+                   preparedStatement = connect.prepareStatement("select * from inventory_db.basket where CustomerName = ? order by Session");
+             preparedStatement.setString(1, custName);
+            preparedStatement.execute();
+            resultSet = preparedStatement.getResultSet();
+                 while (resultSet.next()) {
+                 if (resultSet.getString("Session") != null) sess = new Integer(resultSet.getString("Session")).intValue();
+                 }
+                 if (sess == -2) sess = 0;
+            if (session == -3) session = sess + 1;
+       preparedStatement = connect.prepareStatement("select * from inventory_db.store where NameOfGood = ? and Category = ?");
+             preparedStatement.setString(1, (String)jComboBox6.getSelectedItem());
+             preparedStatement.setString(2, (String)jComboBox1.getSelectedItem());
+            preparedStatement.execute();
+            resultSet = preparedStatement.getResultSet();
+                 while (resultSet.next()) {
+                     price = new Double(resultSet.getString("PricePerUnit")).doubleValue() * new Double(quantity).doubleValue();
+                 }
+            if (jComboBox1.getSelectedIndex() == 0) {
+                category = "Stationery";
+            }
+            if (jComboBox1.getSelectedIndex() == 1) {
+                category = "Gift Items";
+            }
+            if (jComboBox1.getSelectedIndex() == 2) {
+                category = "Electronics";
+            }
+            if (jComboBox1.getSelectedIndex() == 3) {
+                category = "Perishables";
+            }
+            if (jComboBox1.getSelectedIndex() == 4) {
+                category = "Others";
+            }
+            Calendar r = Calendar.getInstance();
+            String dt = r.get(Calendar.DAY_OF_MONTH) + "/" + (r.get(Calendar.MONTH)+1) + "/" + r.get(Calendar.YEAR);
+            jTable5.setValueAt("Good", 0, 0);
+            jTable5.setValueAt("Quantity", 0, 1);
+            jTable5.setValueAt("Price", 0, 2);
+            if (jTextField2.getText() != "") {
+            jTable5.setValueAt(good, reg, 0);
+            jTable5.setValueAt(quantity, reg, 1);
+            jTable5.setValueAt(price, reg, 2);
+            reg++;
+        }
+            preparedStatement = connect.prepareStatement("insert into inventory_db.basket values (?, ?, ?, ?, ?, ?, 'Paid', 'Nil', ?)");
+            // "myuser, webpage, datum, summery, COMMENTS from FEEDBACK.COMMENTS");
+            // Parameters start with 1
+            //preparedStatement.setFloat(1, 3);
+            preparedStatement.setString(1, custName);
+            preparedStatement.setString(2, good);
+            preparedStatement.setString(3, category);
+            preparedStatement.setString(4, quantity);
+            preparedStatement.setString(5, new Double(price).toString());
+            preparedStatement.setString(6, dt);
+            preparedStatement.setString(7, new Integer(session).toString());
+            preparedStatement.executeUpdate();
+
+            session = sess;
+
+            preparedStatement = connect.prepareStatement("select * from inventory_db.store where NameOfGood = ? and Category = ?");
+             preparedStatement.setString(1, (String)jComboBox6.getSelectedItem());
+             preparedStatement.setString(2, (String)jComboBox1.getSelectedItem());
+            preparedStatement.execute();
+            resultSet = preparedStatement.getResultSet();
+                 while (resultSet.next()) {
+                 newquantity = new Double(new Double(resultSet.getString("Quantity")).doubleValue() - new Double(quantity).doubleValue()).toString();
+                 }
+                 sess++;
+             preparedStatement = connect.prepareStatement("update inventory_db.store set Quantity = ? where NameOfGood = ? and Category = ?");
+             preparedStatement.setString(1, newquantity);
+             preparedStatement.setString(2, (String)jComboBox6.getSelectedItem());
+             preparedStatement.setString(3, (String)jComboBox1.getSelectedItem());
+             preparedStatement.executeUpdate();
+            //jTextField19.setText("");
+            jTextField2.setText("");
+        } catch (Exception e) { }
+        finally {
+            close();
+   
+        }
+}//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jInternalFrame1InternalFrameActivated(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_jInternalFrame1InternalFrameActivated
+jComboBox7.addItem("");
+        jInternalFrame1.setSize(532, 439);
+
+        jLabel22.setVisible(false);
+
+        try {
+            // This will load the MySQL driver, each DB has its own driver
+            Class.forName("com.mysql.jdbc.Driver");
+            // Setup the connection with the DB
+            connect = DriverManager.getConnection(connectionUrl);
+
+            // Statements allow to issue SQL queries to the database
+            statement = connect.createStatement();
+            // Result set get the result of the SQL query
+            resultSet = statement.executeQuery("select * from basket order by CustomerName");
+            while (resultSet.next()) {
+jComboBox7.addItem(resultSet.getString("CustomerName"));
+            }
+        } catch (Exception e) {
+                
+            }
+        finally {
+            close();
+            for (int u = 0; u <= jComboBox7.getItemCount()-2; u++) {
+                if (jComboBox7.getItemCount()-2 > u) {
+                if (jComboBox7.getItemAt(u).equals(jComboBox7.getItemAt(u+1))) {jComboBox7.removeItemAt(u);u=u-1;}
+                }
+            }
+        }
+            
+}//GEN-LAST:event_jInternalFrame1InternalFrameActivated
+
+    private void jTextField3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField3ActionPerformed
+        // TODO add your handling code here:
+}//GEN-LAST:event_jTextField3ActionPerformed
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        // TODO add your handling code here:
+        //Filling in goods form
+        // TODO add your handling code here:
+        String connectionUrl = "jdbc:mysql://localhost:3306/inventory_db?" +
+                "user=root&password=red";
+
+        try {
+            // This will load the MySQL driver, each DB has its own driver
+            Class.forName("com.mysql.jdbc.Driver");
+            // Setup the connection with the DB
+            connect = DriverManager.getConnection(connectionUrl);
+
+            // Statements allow to issue SQL queries to the database
+            statement = connect.createStatement();
+            // Result set get the result of the SQL query
+            //Shopping basket table text1, 19, 2, combo 1
+            String Name = jTextField3.getText();
+            String description = jTextArea1.getText();
+            String quantity = jTextField4.getText();
+            String category = null;
+
+            //Stationery, Gift Items, Electronics, Perishables, Others
+            if (jComboBox2.getSelectedIndex() == 0) {
+                category = "Stationery";
+            }
+            if (jComboBox2.getSelectedIndex() == 1) {
+                category = "Gift Items";
+            }
+            if (jComboBox2.getSelectedIndex() == 2) {
+                category = "Electronics";
+            }
+            if (jComboBox2.getSelectedIndex() == 3) {
+                category = "Perishables";
+            }
+            if (jComboBox2.getSelectedIndex() == 4) {
+                category = "Others";
+            }
+            preparedStatement = connect.prepareStatement("insert into inventory_db.store values (?, ?, ? , ?, ?)");
+            preparedStatement.setString(1, quantity);
+            preparedStatement.setString(2, Name);
+            preparedStatement.setString(3, category);
+            preparedStatement.setString(4, description);
+            preparedStatement.setString(5, "Not set");
+
+            preparedStatement.executeUpdate();
+        } catch (Exception e) {System.out.println("Hallo4");} finally {
+            close();
+            jInternalFrame3.setVisible(false);
+            jDialog1.setSize(100, 100);
+            jDialog1.setLocationRelativeTo(this.aboutBox);
+            jDialog1.setVisible(true);
+        }
+    }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void jInternalFrame3InternalFrameActivated(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_jInternalFrame3InternalFrameActivated
+        jInternalFrame3.setSize(576, 510);
+}//GEN-LAST:event_jInternalFrame3InternalFrameActivated
+
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+jInternalFrame4.setVisible(false);
+    }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void jTextField13ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField13ActionPerformed
+        // TODO add your handling code here:
+}//GEN-LAST:event_jTextField13ActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+        // TODO add your handling code here:
+        String connectionUrl = "jdbc:mysql://localhost:3306/inventory_db?" +
+                "user=root&password=red";
+
+        try {
+            // This will load the MySQL driver, each DB has its own driver
+            Class.forName("com.mysql.jdbc.Driver");
+            // Setup the connection with the DB
+            connect = DriverManager.getConnection(connectionUrl);
+
+            // Statements allow to issue SQL queries to the database
+            statement = connect.createStatement();
+            // Result set get the result of the SQL query
+
+
+            String fullname = jTextField13.getText();
+            String address = jTextArea2.getText();
+            String phone = jTextField14.getText();
+
+            String category = null;
+
+            if (jComboBox4.getSelectedIndex() == 0) {
+                category = "Store";
+            }
+            if (jComboBox4.getSelectedIndex() == 1) {
+                category = "Frontdesk";
+            }
+            if (jComboBox4.getSelectedIndex() == 2) {
+                category = "Admin";
+            }
+            String username = jTextField15.getText();
+            String password = jTextField16.getText();
+            String confirm = jTextField17.getText();
+
+            if (password.equals(confirm)) {
+
+                preparedStatement = connect.prepareStatement("insert into inventory_db.users values(?, ?, ? , ?, ?, ?)");
+                // "myuser, webpage, datum, summery, COMMENTS from FEEDBACK.COMMENTS");
+                // Parameters start with 1
+                //preparedStatement.setFloat(1, 3);
+                preparedStatement.setString(1, username);
+                preparedStatement.setString(2, password);
+                preparedStatement.setString(3, category);
+                preparedStatement.setString(4, fullname);
+                preparedStatement.setString(5, address);
+                preparedStatement.setString(6, phone);
+
+                preparedStatement.executeUpdate();
+
+
+                //String SQL = "insert into users value('3','" + username + "','" + password + "','" + fullname + "','" + address + "','" + phone + "','" + category + "')";
+                //boolean n = statement.execute(SQL);
+                //resultSet = statement.executeQuery(SQL);
+            } else {
+                jLabel26.setText("Password Mismatch");
+            }
+
+        } catch (Exception e) {e.printStackTrace();} finally {
+            close();
+            jInternalFrame5.setVisible(false);
+            jDialog1.setSize(100, 100);
+            jDialog1.setLocationRelativeTo(this.aboutBox);
+            jDialog1.setVisible(true);
+        }
+    }//GEN-LAST:event_jButton6ActionPerformed
+
+    private void jComboBox4ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBox4ItemStateChanged
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jComboBox4ItemStateChanged
+
+    private void jInternalFrame5InternalFrameActivated(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_jInternalFrame5InternalFrameActivated
+        jInternalFrame5.setSize(415, 459);
+}//GEN-LAST:event_jInternalFrame5InternalFrameActivated
+
+    private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
+        // TODO add your handling code here:
+}//GEN-LAST:event_jButton8ActionPerformed
+
+    private void jTextField20ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField20ActionPerformed
+        // TODO add your handling code here:
+}//GEN-LAST:event_jTextField20ActionPerformed
+
+    private void jInternalFrame6InternalFrameActivated(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_jInternalFrame6InternalFrameActivated
+        jInternalFrame6.setSize(280, 291);
+}//GEN-LAST:event_jInternalFrame6InternalFrameActivated
+
+    private void jInternalFrame7InternalFrameActivated(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_jInternalFrame7InternalFrameActivated
+       int a = 0;
+       jInternalFrame7.setSize(456, 414);
+        Calendar r = Calendar.getInstance();
+        String g = r.get(Calendar.DAY_OF_MONTH) + "/" + (r.get(Calendar.MONTH)+1) + "/" + r.get(Calendar.YEAR);
+
+ try {
+            // This will load the MySQL driver, each DB has its own driver
+            Class.forName("com.mysql.jdbc.Driver");
+            // Setup the connection with the DB
+            connect = DriverManager.getConnection(connectionUrl);
+
+            // Statements allow to issue SQL queries to the database
+            statement = connect.createStatement();
+            // Result set get the result of the SQL query
+            //resultSet = statement.executeQuery;
+            preparedStatement = connect.prepareStatement("select * from basket where TimeBought like ? ");
+             preparedStatement.setString(1, g);
+            preparedStatement.execute();
+            resultSet = preparedStatement.getResultSet();
+            while (resultSet.next()) {
+                jTable2.setValueAt(resultSet.getString("GoodBought"), a, 0);
+                jTable2.setValueAt(resultSet.getString("Price"), a, 1);
+                 jTable2.setValueAt(resultSet.getString("Quantity"), a, 2);
+                 a++;
+     }
+
+}
+catch (Exception e) {
+
+}
+
+}//GEN-LAST:event_jInternalFrame7InternalFrameActivated
+
+    private void jButton10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton10ActionPerformed
+jInternalFrame8.setVisible(false);
+}//GEN-LAST:event_jButton10ActionPerformed
+
+    private void jInternalFrame8InternalFrameActivated(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_jInternalFrame8InternalFrameActivated
+jInternalFrame8.setSize(361, 370);
+int a = 0;
+ try {
+            // This will load the MySQL driver, each DB has its own driver
+            Class.forName("com.mysql.jdbc.Driver");
+            // Setup the connection with the DB
+            connect = DriverManager.getConnection(connectionUrl);
+
+            // Statements allow to issue SQL queries to the database
+            statement = connect.createStatement();
+            // Result set get the result of the SQL query
+            resultSet = statement.executeQuery("select * from store");
+            while (resultSet.next()) {
+                jTable3.setValueAt(resultSet.getString("NameOfGood"), a, 0);
+                 jTable3.setValueAt(resultSet.getString("Quantity"), a, 1);
+                  jTable3.setValueAt(resultSet.getString("PricePerUnit"), a, 2);
+                 a++;
+     }
+
+}
+catch (Exception e) {
+    
+}
+}//GEN-LAST:event_jInternalFrame8InternalFrameActivated
+
+    private void jInternalFrame9InternalFrameActivated(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_jInternalFrame9InternalFrameActivated
+        //jInternalFrame9.setSize(217, 177);
+}//GEN-LAST:event_jInternalFrame9InternalFrameActivated
+
+    private void jButton12ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton12ActionPerformed
+      jInternalFrame1.setVisible(true);
+  //      jInternalFrame1.setSize(500, 300);
+    }//GEN-LAST:event_jButton12ActionPerformed
+
+    private void jButton14ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton14ActionPerformed
+        jInternalFrame7.setVisible(true);
+    }//GEN-LAST:event_jButton14ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+if (gru) {
+    customer = (String)jComboBox7.getSelectedItem();
+reg = 1;
+jButton2.setText("Prepare receipt");
+gru = false;
+jButton1.setEnabled(false);
+    double total = 0;
+
+    int kpi = 0;
+for (int y = 1; y <= 19; y++) {
+ 
+if (jTable5.getValueAt(y, 2) != null) {Double l = new Double((Double)jTable5.getValueAt(y, 2));total = total + l.doubleValue();}
+ else {
+    kpi = y;
+    y = 49;
+ }
+}
+    jTable5.setValueAt("Total", kpi, 0);
+     jTable5.setValueAt(total, kpi, 2);
+
+return;
+        }
+ else {
+ String[] t = {"Good", "Quantity", "Price"};
+       printReport(jTable2, t, "receipt.html");}
+ for (int y = 0; y <= 19; y++) {
+jTable5.setValueAt("", y, 0);
+jTable5.setValueAt("", y, 1);
+jTable5.setValueAt("", y, 2);
+ }
+jButton2.setText("Customer Finished");
+           jInternalFrame1.setVisible(false);
+            jDialog1.setSize(100, 100);
+            jDialog1.setLocationRelativeTo(this.aboutBox);
+            jDialog1.setVisible(true);
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jDesktopPane1MouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jDesktopPane1MouseMoved
+ if ((OfficerLoggedIn != null) || (OfficerCategory != null)) {
+        progressBar.setString("Officer Logged In: " + OfficerLoggedIn + " as " + OfficerCategory);
+        //System.out.println("Not Faulty");
+        if (OfficerCategory.equals("Frontdesk")) {
+        jToolBar2.setVisible(false);
+        jMenu2.setVisible(false);
+        jMenu3.setVisible(false);
+        jMenu4.setVisible(false);
+        }
+        if (OfficerCategory.equals("Store")) {
+            jToolBar1.setVisible(false);
+            jMenu1.setVisible(false);
+            jMenu3.setVisible(false);
+        jMenu4.setVisible(false);
+        }
+        }
+ else System.out.println("Faulty");
+ if (opportune) {
+     try {
+Class.forName("com.mysql.jdbc.Driver");
+            connect = DriverManager.getConnection(connectionUrl);
+            statement = connect.createStatement();
+            resultSet = statement.executeQuery("select * from store");
+            while (resultSet.next()) {
+if (new Double(resultSet.getString("Quantity")).doubleValue() < alertAmount) {
+    jLabel21.setText(jLabel21.getText() + " for " + resultSet.getString("NameOfGood") + ",");
+    jInternalFrame9.setVisible(true);
+}
+}
+        }
+catch (Exception e) {
+
+}
+finally {
+    close();
+}
+opportune = false;
+ }
+    }//GEN-LAST:event_jDesktopPane1MouseMoved
+
+    private void jButton15ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton15ActionPerformed
+        jInternalFrame3.setVisible(true);
+    }//GEN-LAST:event_jButton15ActionPerformed
+
+    private void jButton16ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton16ActionPerformed
+jInternalFrame10.setVisible(true);
+    }//GEN-LAST:event_jButton16ActionPerformed
+
+    private void jMenuItem9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem9ActionPerformed
+jInternalFrame10.setVisible(true);
+    }//GEN-LAST:event_jMenuItem9ActionPerformed
+
+    private void jMenuItem11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem11ActionPerformed
+jInternalFrame12.setVisible(true);
+    }//GEN-LAST:event_jMenuItem11ActionPerformed
+
+    private void jTextField2CaretPositionChanged(java.awt.event.InputMethodEvent evt) {//GEN-FIRST:event_jTextField2CaretPositionChanged
+double no = new java.lang.Double((String)jTextField2.getText()).doubleValue();
+try {
+Class.forName("com.mysql.jdbc.Driver");
+            connect = DriverManager.getConnection(connectionUrl);
+            statement = connect.createStatement();
+             preparedStatement = connect.prepareStatement("select * from inventory_db.store where NameOfGood = ? and Category = ?");
+             preparedStatement.setString(1, (String)jComboBox6.getSelectedItem());
+             preparedStatement.setString(2, (String)jComboBox1.getSelectedItem());
+            preparedStatement.execute();
+            resultSet = preparedStatement.getResultSet();
+                 while (resultSet.next()) {
+                 if (new Double(resultSet.getString("Quantity")).doubleValue() > no) {
+jLabel32.setText("Quantity exceeds amount in store!!");
+                 }
+ else jLabel32.setText("Enough");
+    }
+        }
+catch (Exception r) {
+   System.out.println("O");
+}
+    }//GEN-LAST:event_jTextField2CaretPositionChanged
+
+    private void jTextField2CaretUpdate(javax.swing.event.CaretEvent evt) {//GEN-FIRST:event_jTextField2CaretUpdate
+double no = 10;
+        if ((String)jTextField2.getText() != null) {no = new java.lang.Double((String)jTextField2.getText()).doubleValue();}
+try {
+Class.forName("com.mysql.jdbc.Driver");
+            connect = DriverManager.getConnection(connectionUrl);
+            statement = connect.createStatement();
+             preparedStatement = connect.prepareStatement("select * from inventory_db.store where NameOfGood = ? and Category = ?");
+             preparedStatement.setString(1, (String)jComboBox6.getSelectedItem());
+             preparedStatement.setString(2, (String)jComboBox1.getSelectedItem());
+            preparedStatement.execute();
+            resultSet = preparedStatement.getResultSet();
+                 while (resultSet.next()) {
+                if (new Double(resultSet.getString("Quantity")).doubleValue() < no) {
+jLabel32.setText("Quantity exceeds amount in store!!");
+jButton1.setEnabled(false);
+jButton2.setEnabled(false);
+                 }
+ else {jLabel32.setText("Quantity in stock is up to number");
+ jButton1.setEnabled(true);
+jButton2.setEnabled(true);
+
+                     }
+    }
+        }
+catch (Exception r) {
+   System.out.println("O");
+}    }//GEN-LAST:event_jTextField2CaretUpdate
+
+    private void jInternalFrame2FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jInternalFrame2FocusLost
+jLabel33.setText("0");
+jTextField5.setText("");jTextField5.setEnabled(true);
+jTextField6.setText("");jTextField6.setEnabled(true);
+jTextField7.setText("");jTextField7.setEnabled(true);
+jTextField8.setText("");jTextField8.setEnabled(true);
+jTextField9.setText("");jTextField9.setEnabled(true);
+jTextField10.setText("");jTextField10.setEnabled(true);
+jTextField11.setText("");jTextField11.setEnabled(true);
+jTextField12.setText("");jTextField12.setEnabled(true);
+    }//GEN-LAST:event_jInternalFrame2FocusLost
+
+    private void jInternalFrame2InternalFrameClosing(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_jInternalFrame2InternalFrameClosing
+jLabel33.setText("0");
+jTextField5.setText("");jTextField5.setEnabled(true);
+jTextField6.setText("");jTextField6.setEnabled(true);
+jTextField7.setText("");jTextField7.setEnabled(true);
+jTextField8.setText("");jTextField8.setEnabled(true);
+jTextField9.setText("");jTextField9.setEnabled(true);
+jTextField10.setText("");jTextField10.setEnabled(true);
+jTextField11.setText("");jTextField11.setEnabled(true);
+jTextField12.setText("");jTextField12.setEnabled(true);
+    }//GEN-LAST:event_jInternalFrame2InternalFrameClosing
+
+    private void jInternalFrame10InternalFrameActivated(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_jInternalFrame10InternalFrameActivated
+int a = 0;
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            connect = DriverManager.getConnection(connectionUrl);
+            statement = connect.createStatement();
+              resultSet = statement.executeQuery("select * from inventory_db.store where PricePerUnit = 'Not set'");
+            while (resultSet.next()) {
+                jTable4.setValueAt(resultSet.getString("NameOfGood"), a, 0);
+                jTable4.setValueAt(resultSet.getString("Category"), a, 1);
+                jTable4.setValueAt(resultSet.getString("PricePerUnit"), a, 2);
+                a++;
+            }
+            }
+        catch (Exception e) {System.out.println("Hallo7");} finally {
+            close();
+        }
+        jButton20.setEnabled(false);
+    }//GEN-LAST:event_jInternalFrame10InternalFrameActivated
+
+    private void jTable4PropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_jTable4PropertyChange
+jButton20.setEnabled(true);
+    }//GEN-LAST:event_jTable4PropertyChange
+
+    private void jButton20ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton20ActionPerformed
+int a = jTable4.getRowCount();
+        try {
+    Class.forName("com.mysql.jdbc.Driver");
+    connect = DriverManager.getConnection(connectionUrl);
+    statement = connect.createStatement();
+for (int g = 0; g <= a - 1; g++) {
+if ((jTable4.getValueAt(g, 0) != null)&&(jTable4.getValueAt(g, 1) != null)) {
+preparedStatement = connect.prepareStatement("update inventory_db.store set PricePerUnit = ? where NameOfGood = ? and Category = ?;");
+preparedStatement.setString(1, (String)jTable4.getValueAt(g, 2));
+preparedStatement.setString(2, (String)jTable4.getValueAt(g, 0));
+preparedStatement.setString(3, (String)jTable4.getValueAt(g, 1));
+preparedStatement.execute();
+    }
+    }
+        }
+catch (Exception e) {
+
+}
+finally {
+    close();
+    jInternalFrame10.setVisible(false);
+    jDialog1.setSize(100, 100);
+    jDialog1.setLocationRelativeTo(this.aboutBox);
+    jDialog1.setVisible(true);
+}
+    }//GEN-LAST:event_jButton20ActionPerformed
+
+    private void jButton22ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton22ActionPerformed
+
+jDialog1.setVisible(false);
+    }//GEN-LAST:event_jButton22ActionPerformed
+
+    private void jMenuItem7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem7ActionPerformed
+jInternalFrame8.setVisible(true);
+    }//GEN-LAST:event_jMenuItem7ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+//Denomination codes
+int x1000 = 0;
+int x500 = 0;
+int x200 = 0;
+int x100 = 0;
+int x50 = 0;
+int x20 = 0;
+int x10 = 0;
+int x5 = 0;
+        int a = 0;
+     String[] hop = new String[8];
+     Calendar r = Calendar.getInstance();
+     String g = r.get(Calendar.DAY_OF_MONTH) + "/" + (r.get(Calendar.MONTH) + 1) + "/" + r.get(Calendar.YEAR);
+ try {
+            Class.forName("com.mysql.jdbc.Driver");
+            connect = DriverManager.getConnection(connectionUrl);
+            statement = connect.createStatement();
+            preparedStatement = connect.prepareStatement("select * from cashledger where Date = ?");
+            preparedStatement.setString(1, g);
+            preparedStatement.execute();
+            resultSet = preparedStatement.getResultSet();
+            while (resultSet.next()) {
+                hop[0] = resultSet.getString("d1000");
+                hop[1] = resultSet.getString("d500");
+                hop[2] = resultSet.getString("d200");
+                hop[3] = resultSet.getString("d100");
+                hop[4] = resultSet.getString("d50");
+                hop[5] = resultSet.getString("d20");
+                hop[6] = resultSet.getString("d10");
+                hop[7] = resultSet.getString("d5");
+                a++;
+     }
+if (a > 0) {
+//preparedStatement = connect.prepareStatement("update cashledger set d1000 = ? and d500 = ? and d200 = ? and d100 = ? and d50 = ? and d20 = ? and d10 = ? and d5 = ? where Date = ?");
+if (jTextField5.getText().length() > 0) {
+x1000 = new Integer(jTextField5.getText()).intValue();
+preparedStatement = connect.prepareStatement("update cashledger set d1000 = ? where Date = ?");
+preparedStatement.setString(1, new Integer((new Integer(hop[0]).intValue() + new Integer(jTextField5.getText()).intValue())).toString());
+preparedStatement.setString(2, g);
+preparedStatement.execute();
+}
+if (jTextField6.getText().length() > 0) {
+x500 = new Integer(jTextField6.getText()).intValue();
+preparedStatement = connect.prepareStatement("update cashledger set d500 = ? where Date = ?");
+preparedStatement.setString(1, new Integer((new Integer(hop[1]).intValue() + new Integer(jTextField6.getText()).intValue())).toString());
+preparedStatement.setString(2, g);
+preparedStatement.execute();
+    }
+if (jTextField7.getText().length() > 0) {
+x200 = new Integer(jTextField7.getText()).intValue();
+preparedStatement = connect.prepareStatement("update cashledger set d200 = ? where Date = ?");
+preparedStatement.setString(1, new Integer((new Integer(hop[2]).intValue() + new Integer(jTextField7.getText()).intValue())).toString());
+preparedStatement.setString(2, g);
+preparedStatement.execute();
+    }
+if (jTextField8.getText().length() > 0) {
+x100 = new Integer(jTextField8.getText()).intValue();
+preparedStatement = connect.prepareStatement("update cashledger set d100 = ? where Date = ?");
+preparedStatement.setString(1, new Integer((new Integer(hop[3]).intValue() + new Integer(jTextField8.getText()).intValue())).toString());
+preparedStatement.setString(2, g);
+preparedStatement.execute();
+    }
+if (jTextField9.getText().length() > 0) {
+x50 = new Integer(jTextField9.getText()).intValue();
+preparedStatement = connect.prepareStatement("update cashledger set d50 = ? where Date = ?");
+preparedStatement.setString(1, new Integer((new Integer(hop[4]).intValue() + new Integer(jTextField9.getText()).intValue())).toString());
+preparedStatement.setString(2, g);
+preparedStatement.execute();
+    }
+
+if (jTextField10.getText().length() > 0) {
+x20 = new Integer(jTextField10.getText()).intValue();
+preparedStatement = connect.prepareStatement("update cashledger set d20 = ? where Date = ?");
+preparedStatement.setString(1, new Integer((new Integer(hop[5]).intValue() + new Integer(jTextField10.getText()).intValue())).toString());
+preparedStatement.setString(2, g);
+preparedStatement.execute();
+    }
+
+if (jTextField11.getText().length() > 0) {
+x10 = new Integer(jTextField11.getText()).intValue();
+preparedStatement = connect.prepareStatement("update cashledger set d10 = ? where Date = ?");
+preparedStatement.setString(1, new Integer((new Integer(hop[6]).intValue() + new Integer(jTextField11.getText()).intValue())).toString());
+preparedStatement.setString(2, g);
+preparedStatement.execute();
+    }
+if (jTextField12.getText().length() > 0) {
+x5 = new Integer(jTextField12.getText()).intValue();
+preparedStatement = connect.prepareStatement("update cashledger set d5 = ? where Date = ?");
+preparedStatement.setString(1, new Integer((new Integer(hop[7]).intValue() + new Integer(jTextField12.getText()).intValue())).toString());
+preparedStatement.setString(2, g);
+preparedStatement.execute();
+}
+     }
+ else if (a == 0) {
+preparedStatement = connect.prepareStatement("insert into cashledger values(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+if (jTextField5.getText().length() > 0) {preparedStatement.setString(1, jTextField5.getText());} else preparedStatement.setString(1, "0");
+if (jTextField6.getText().length() > 0) {preparedStatement.setString(2, jTextField6.getText());} else preparedStatement.setString(2, "0");
+if (jTextField7.getText().length() > 0) {preparedStatement.setString(3, jTextField7.getText());} else preparedStatement.setString(3, "0");
+if (jTextField8.getText().length() > 0) {preparedStatement.setString(4, jTextField8.getText());} else preparedStatement.setString(4, "0");
+if (jTextField9.getText().length() > 0) {preparedStatement.setString(5, jTextField9.getText());} else preparedStatement.setString(5, "0");
+if (jTextField10.getText().length() > 0) {preparedStatement.setString(6, jTextField10.getText());} else preparedStatement.setString(6, "0");
+if (jTextField11.getText().length() > 0) {preparedStatement.setString(7, jTextField11.getText());} else preparedStatement.setString(7, "0");
+if (jTextField12.getText().length() > 0) {preparedStatement.setString(8, jTextField12.getText());} else preparedStatement.setString(8, "0");
+preparedStatement.setString(9, g);
+preparedStatement.execute();
+ }
+double cashpaid = ((double)x1000*1000)+((double)x500*500)+((double)x200*200)+((double)x100*100)+((double)x50*50)+((double)x10*10)+((double)x5*5);
+if (cashpaid > price) {
+preparedStatement = connect.prepareStatement("update basket set Paid = 'Paid' where CustomerName = ? and Date = ? and Session = ?");
+preparedStatement.setString(1, customer);
+preparedStatement.setString(2, g);
+preparedStatement.setString(3, new Integer(session).toString());
+preparedStatement.execute();
+
+}
+if (cashpaid == price) {
+preparedStatement = connect.prepareStatement("update basket set Paid = 'Paid' where CustomerName = ? and Date = ? and Session = ?");
+preparedStatement.setString(1, customer);
+preparedStatement.setString(2, g);
+preparedStatement.setString(3, new Integer(session).toString());
+preparedStatement.execute();
+}
+session = -3;
+}
+catch (Exception e) {
+e.printStackTrace();
+}
+     finally {
+         close();
+     }
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jMenuItem10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem10ActionPerformed
+jInternalFrame5.setVisible(true);
+    }//GEN-LAST:event_jMenuItem10ActionPerformed
+
+    private void jButton17ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton17ActionPerformed
+
+    }//GEN-LAST:event_jButton17ActionPerformed
+
+    private void jInternalFrame12InternalFrameActivated(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_jInternalFrame12InternalFrameActivated
+ try {
+            Class.forName("com.mysql.jdbc.Driver");
+            connect = DriverManager.getConnection(connectionUrl);
+            statement = connect.createStatement();
+            resultSet = statement.executeQuery("select * from users order by Name");
+            while (resultSet.next()) {
+jComboBox8.addItem(resultSet.getString("Name"));
+     }
+        }
+ catch (Exception e) {
+     
+ }
+ finally {
+     close();
+    
+ }
+    }//GEN-LAST:event_jInternalFrame12InternalFrameActivated
+
+    private void jButton23ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton23ActionPerformed
+  try {
+            Class.forName("com.mysql.jdbc.Driver");
+            connect = DriverManager.getConnection(connectionUrl);
+            statement = connect.createStatement();
+            preparedStatement = connect.prepareStatement("delete from users where Name = ?");
+            preparedStatement.setString(1, (String)jComboBox8.getSelectedItem());
+            preparedStatement.execute();
+        }
+  catch (Exception e) {
+
+  }
+  finally {
+      close();
+      jInternalFrame12.setVisible(false);
+      jDialog1.setSize(100, 100);
+    jDialog1.setLocationRelativeTo(this.aboutBox);
+    jDialog1.setVisible(true);
+  }
+    }//GEN-LAST:event_jButton23ActionPerformed
+
+    private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton11ActionPerformed
+jInternalFrame9.setVisible(false);
+    }//GEN-LAST:event_jButton11ActionPerformed
+
+    private void jButton19ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton19ActionPerformed
+String[] t = {"Good", "Amount", "Quantity"};
+       printReport(jTable2, t, "quantity.html");
+       jInternalFrame7.setVisible(false);
+      jDialog1.setSize(100, 100);
+    jDialog1.setLocationRelativeTo(this.aboutBox);
+    jDialog1.setVisible(true);
+    }//GEN-LAST:event_jButton19ActionPerformed
+
+    private void jButton18ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton18ActionPerformed
+String[] t = {"Good", "Quantity"};
+        printReport(jTable3, t, "quantity2.html");
+        jInternalFrame8.setVisible(false);
+      jDialog1.setSize(100, 100);
+    jDialog1.setLocationRelativeTo(this.aboutBox);
+    jDialog1.setVisible(true);
+    }//GEN-LAST:event_jButton18ActionPerformed
+
+    private void jButton9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton9ActionPerformed
+        jInternalFrame7.setVisible(false);
+    }//GEN-LAST:event_jButton9ActionPerformed
+
+    private void jButton24ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton24ActionPerformed
+        BufferedWriter out = null;
+        String k = "<html><head><title>Report</title>";
+        k = k + "<style type=text/css><!-- .style10 {font-family: Arial, Helvetica, sans-serif; font-size: 12px; }.style11 {font-family: Agency FB, Juice ITC; font-size: 24px; }--></style>";
+        k = k + "</head><body><div align=center class=style10><p><img src=5.jpg width=54 height=67 alt=logo /><strong>Report</strong></p></div>";
+        k = k + "<div align=center style=border:double><strong><span class=style11>Receipt</span></strong></div>";
+        k = k + "<table width=430 border=1>";
+        k = k + "<tr>";
+        k = k + "<th width=100><span class=style10>Good Bought</span></th>";
+        k = k + "<th width=100><span class=style10>Price</span></th>";
+        k = k + "</tr>";
+
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            connect = DriverManager.getConnection(connectionUrl);
+            statement = connect.createStatement();
+            preparedStatement = connect.prepareStatement("select * from basket where CustomerName = ? and Session = ?");
+            preparedStatement.setString(1, customer);
+            preparedStatement.setString(2, new Integer(session).toString());
+            preparedStatement.execute();
+            resultSet = preparedStatement.getResultSet();
+            while (resultSet.next()) {
+                k = k + "<tr>";
+                k = k + "<th><span class=style10>" + resultSet.getString("GoodBought") + "</span></th>";
+                k = k + "<th><span class=style10>" + resultSet.getString("Price") + "</span></th>";
+                k = k + "</tr>";
+            }
+            k = k + "</table></body></html>";
+
+            try {
+                File file = new File("receipt.html");
+                if (file.exists()) file.delete();
+                out = new BufferedWriter(new FileWriter(file,true));
+
+                out.write(k);
+
+                out.close();
+            } catch(IOException e) {}
+
+        }
+
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+}//GEN-LAST:event_jButton24ActionPerformed
+
+    private void jInternalFrame4InternalFrameActivated(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_jInternalFrame4InternalFrameActivated
+int a = 0;
+ try {
+            // This will load the MySQL driver, each DB has its own driver
+            Class.forName("com.mysql.jdbc.Driver");
+            // Setup the connection with the DB
+            connect = DriverManager.getConnection(connectionUrl);
+
+            // Statements allow to issue SQL queries to the database
+            statement = connect.createStatement();
+            // Result set get the result of the SQL query
+            resultSet = statement.executeQuery("select * from store");
+            while (resultSet.next()) {
+                jTable1.setValueAt(resultSet.getString("NameOfGood"), a, 0);
+                 jTable1.setValueAt(resultSet.getString("Description"), a, 1);
+                  jTable1.setValueAt(resultSet.getString("Quantity"), a, 2);
+                 a++;
+     }
+
+}
+catch (Exception e) {
+    
+}
+jInternalFrame4.setSize(624, 534);    }//GEN-LAST:event_jInternalFrame4InternalFrameActivated
+
+    private void jComboBox1ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBox1ItemStateChanged
+        jComboBox6.removeAllItems();
+
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            connect = DriverManager.getConnection(connectionUrl);
+            statement = connect.createStatement();
+            preparedStatement = connect.prepareStatement("select * from inventory_db.store where Category = ?");
+            preparedStatement.setString(1, (String)jComboBox1.getSelectedItem());
+            preparedStatement.execute();
+            resultSet = preparedStatement.getResultSet();
+            while (resultSet.next()) {
+                if (resultSet.getString("PricePerUnit") == null ? "Not set" != null : !resultSet.getString("PricePerUnit").equals("Not set")) {
+                    String name = resultSet.getString("NameOfGood");
+                    jComboBox6.addItem(name);
+                }
+            }
+        } catch (Exception e) {System.out.println("Hallo7");} finally {
+
+            close();
+        }
+}//GEN-LAST:event_jComboBox1ItemStateChanged
+
+    public void initialiseComponents() {
+        //jDesktopPane1 = new javax.swing.JDesktopPane();
+jInternalFrame1 = new javax.swing.JInternalFrame();
+jInternalFrame2 = new javax.swing.JInternalFrame();
+jInternalFrame3 = new javax.swing.JInternalFrame();
+jInternalFrame4 = new javax.swing.JInternalFrame();
+jInternalFrame5 = new javax.swing.JInternalFrame();
+jInternalFrame6 = new javax.swing.JInternalFrame();
+jInternalFrame7 = new javax.swing.JInternalFrame();
+jInternalFrame8 = new javax.swing.JInternalFrame();
+jInternalFrame9 = new javax.swing.JInternalFrame();
+
+    }
+
+    @Action
+    public void jMenu1Clicked() {
+        jInternalFrame1.setVisible(true);
+        jInternalFrame1.setSize(500, 300);
+    }
+
+    @Action
+    public void jMenuItem2Clicked() {
+        jInternalFrame2.setVisible(true);
+    }
+
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton10;
+    private javax.swing.JButton jButton11;
+    private javax.swing.JButton jButton12;
+    private javax.swing.JButton jButton14;
+    private javax.swing.JButton jButton15;
+    private javax.swing.JButton jButton16;
+    private javax.swing.JButton jButton17;
+    private javax.swing.JButton jButton18;
+    private javax.swing.JButton jButton19;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton20;
+    private javax.swing.JButton jButton21;
+    private javax.swing.JButton jButton22;
+    private javax.swing.JButton jButton23;
+    private javax.swing.JButton jButton24;
+    private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
+    private javax.swing.JButton jButton5;
+    private javax.swing.JButton jButton6;
+    private javax.swing.JButton jButton7;
+    private javax.swing.JButton jButton8;
+    private javax.swing.JButton jButton9;
+    javax.swing.JComboBox jComboBox1;
+    private javax.swing.JComboBox jComboBox2;
+    private javax.swing.JComboBox jComboBox3;
+    javax.swing.JComboBox jComboBox4;
+    private javax.swing.JComboBox jComboBox5;
+    private javax.swing.JComboBox jComboBox6;
+    private javax.swing.JComboBox jComboBox7;
+    private javax.swing.JComboBox jComboBox8;
+    private javax.swing.JDesktopPane jDesktopPane1;
+    private javax.swing.JDialog jDialog1;
+    javax.swing.JInternalFrame jInternalFrame1;
+    javax.swing.JInternalFrame jInternalFrame10;
+    javax.swing.JInternalFrame jInternalFrame11;
+    javax.swing.JInternalFrame jInternalFrame12;
+    javax.swing.JInternalFrame jInternalFrame2;
+    javax.swing.JInternalFrame jInternalFrame3;
+    javax.swing.JInternalFrame jInternalFrame4;
+    javax.swing.JInternalFrame jInternalFrame5;
+    javax.swing.JInternalFrame jInternalFrame6;
+    javax.swing.JInternalFrame jInternalFrame7;
+    javax.swing.JInternalFrame jInternalFrame8;
+    javax.swing.JInternalFrame jInternalFrame9;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
+    private javax.swing.JLabel jLabel22;
+    private javax.swing.JLabel jLabel23;
+    private javax.swing.JLabel jLabel24;
+    private javax.swing.JLabel jLabel25;
+    javax.swing.JLabel jLabel26;
+    private javax.swing.JLabel jLabel27;
+    private javax.swing.JLabel jLabel28;
+    private javax.swing.JLabel jLabel29;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel30;
+    private javax.swing.JLabel jLabel31;
+    private javax.swing.JLabel jLabel32;
+    private javax.swing.JLabel jLabel33;
+    private javax.swing.JLabel jLabel34;
+    private javax.swing.JLabel jLabel35;
+    private javax.swing.JLabel jLabel36;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
+    javax.swing.JMenu jMenu1;
+    javax.swing.JMenu jMenu2;
+    javax.swing.JMenu jMenu3;
+    javax.swing.JMenu jMenu4;
+    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem10;
+    private javax.swing.JMenuItem jMenuItem11;
+    private javax.swing.JMenuItem jMenuItem3;
+    private javax.swing.JMenuItem jMenuItem5;
+    private javax.swing.JMenuItem jMenuItem6;
+    private javax.swing.JMenuItem jMenuItem7;
+    private javax.swing.JMenuItem jMenuItem9;
+    private javax.swing.JPasswordField jPasswordField1;
+    private javax.swing.JPasswordField jPasswordField2;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JScrollPane jScrollPane5;
+    private javax.swing.JScrollPane jScrollPane6;
+    private javax.swing.JScrollPane jScrollPane7;
+    javax.swing.JTable jTable1;
+    javax.swing.JTable jTable2;
+    javax.swing.JTable jTable3;
+    private javax.swing.JTable jTable4;
+    private javax.swing.JTable jTable5;
+    javax.swing.JTextArea jTextArea1;
+    javax.swing.JTextArea jTextArea2;
+    private javax.swing.JTextField jTextField10;
+    private javax.swing.JTextField jTextField11;
+    private javax.swing.JTextField jTextField12;
+    javax.swing.JTextField jTextField13;
+    javax.swing.JTextField jTextField14;
+    javax.swing.JTextField jTextField15;
+    javax.swing.JTextField jTextField16;
+    javax.swing.JTextField jTextField17;
+    private javax.swing.JTextField jTextField18;
+    javax.swing.JTextField jTextField2;
+    private javax.swing.JTextField jTextField20;
+    private javax.swing.JTextField jTextField21;
+    private javax.swing.JTextField jTextField22;
+    private javax.swing.JTextField jTextField3;
+    javax.swing.JTextField jTextField4;
+    private javax.swing.JTextField jTextField5;
+    private javax.swing.JTextField jTextField6;
+    private javax.swing.JTextField jTextField7;
+    private javax.swing.JTextField jTextField8;
+    private javax.swing.JTextField jTextField9;
+    javax.swing.JToolBar jToolBar1;
+    javax.swing.JToolBar jToolBar2;
+    private java.awt.Label label1;
+    private java.awt.Label label2;
+    private java.awt.Label label3;
+    private java.awt.Label label4;
+    private javax.swing.JPanel mainPanel;
+    private javax.swing.JMenuBar menuBar;
+    private javax.swing.JProgressBar progressBar;
+    private javax.swing.JLabel statusAnimationLabel;
+    private javax.swing.JLabel statusMessageLabel;
+    javax.swing.JPanel statusPanel;
+    // End of variables declaration//GEN-END:variables
+   
+
+private Connection connect = null;
+	private Statement statement = null;
+	private PreparedStatement preparedStatement = null;
+	private ResultSet resultSet = null;
+    private final Timer messageTimer;
+    private final Timer busyIconTimer;
+    private final Icon idleIcon;
+    private final Icon[] busyIcons = new Icon[15];
+    private int busyIconIndex = 0;
+
+    private JDialog aboutBox;
+}
