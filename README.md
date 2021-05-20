@@ -1,1 +1,2 @@
 # SMEInventorySystem
+This project was done as a final year project and is a demonstration of an inventory management system for a small scale enterprise setup. Users can log in and view products for purchase and add to a cart and purchase, provision was made for admin users to log in and add to or remove from the inventory and add or modify prices. The project was implemented with Java using mySQL as a backend. 
